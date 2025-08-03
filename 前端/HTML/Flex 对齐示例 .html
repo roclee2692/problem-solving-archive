@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 全局重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /*
+      .container
+      - 外部容器，宽度70%、高度700px
+      - 背景色设置为黑色，并隐藏溢出
+    */
+    .container {
+      width: 70%;
+      height: 800px;
+      margin: 0 auto;
+      background-color: rgb(70, 246, 152);
+      overflow: hidden;
+    }
+
+    /*
+      .box
+      - 使用Flex布局，设置宽度、高度、背景色与圆角
+      - justify-content和align-items可控制内部子元素的对齐方式
+    */
+    .box {
+      display: flex;
+      width: 100%;
+      height: 100px;
+      margin: 0 auto;
+      background-color: #f755cc;
+      padding: 5px;
+      border-radius: 15px;
+      justify-content: center;   /* 主轴(横向)上居中 */
+      align-items: center;       /* 交叉轴(纵向)上居中 */
+    }
+
+    /* .dot
+       - 小圆点元素，用于演示位置对齐
+       - 直径20px的黑色圆，border-radius: 50%以实现圆形
+    */
+    .dot {
+      width: 50px;
+      height: 50px;
+      background-color: black;
+      border-radius: 50%;
+    }
+
+    /*
+      .itemStart、.itemEnd、.itemCenter
+      - 同样是Flex容器
+      - 通过 justify-content / align-items 不同值演示子元素的对齐方式
+    */
+    .itemStart {
+      flex: 1;                  /* 可伸缩，平分剩余空间 */
+      height: 100%;
+      display: flex;
+      justify-content: flex-start;  /* 水平起始对齐 */
+      align-items: flex-start;      /* 垂直起始对齐 */
+    }
+
+    .itemEnd {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      justify-content: flex-end;  /* 水平末端对齐 */
+      align-items: flex-end;      /* 垂直末端对齐 */
+    }
+
+    .itemCenter {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      justify-content: center;  /* 水平居中 */
+      align-items: center;      /* 垂直居中 */
+    }
+
+    /*
+      .item
+      - flex-direction改为column: 让里面的两个小圆点垂直排列
+      - justify-content: space-between 在垂直方向上分散对齐
+    */
+    .item {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;      /* 垂直方向排列子元素 */
+      justify-content: space-between; /* 顶部一个圆点、底部一个圆点 */
+    }
+
+    /*
+      .item:nth-child(1)、.item:nth-child(2)
+      - 分别让第1个和第2个 .item 内部的圆点靠左或靠右
+    */
+    .item:nth-child(1) {
+      align-items: flex-start;  /* 垂直列布局后，水平方向上居左 */
+    }
+    .item:nth-child(2) {
+      align-items: flex-end;    /* 水平方向上居右 */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 第一行box：只有一个dot -->
+    <div class="box">
+      <div class="dot"></div>
+    </div>
+
+    <!-- 第二行box：左对齐 和 右对齐 -->
+    <div class="box">
+      <div class="itemStart">
+        <div class="dot"></div>
+      </div>
+      <div class="itemEnd">
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <!-- 第三行box：左对齐、中间对齐、右对齐 -->
+    <div class="box">
+      <div class="itemStart">
+        <div class="dot"></div>
+      </div>
+      <div class="itemCenter">
+        <div class="dot"></div>
+      </div>
+      <div class="itemEnd">
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <!-- 第四行box：两列，且每列中有上下两个dot -->
+    <div class="box">
+      <div class="item">
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="item">
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

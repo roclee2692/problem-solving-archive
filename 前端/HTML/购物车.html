@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>购物车示例</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #49e460;
+    }
+    table {
+      width: 600px;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #37c1d0;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #dd2a2a;
+    }
+    .btn {
+      padding: 6px 6px;
+      cursor: pointer;
+      margin: 1 1px;
+    }
+    #emptyTip {
+      color: #4226cb;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>综合练习：实现购物车</h2>
+  <p>需求：  
+    <ol>
+      <li>数量不能 &lt; 1</li>
+      <li>修改数量，总价格会实时计算</li>
+      <li>当所有商品全部移除时，显示 购物车中没有商品</li>
+    </ol>
+  </p>
+
+  <table id="cartTable">
+    <thead>
+      <tr>
+        <th>书籍名称</th>
+        <th>出版日期</th>
+        <th>价格</th>
+        <th>购买数量</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="cartTbody">
+      <!-- JS 动态渲染 -->
+    </tbody>
+  </table>
+  <p id="emptyTip" style="display:none;">购物车中没有商品</p>
+
+  <p style="margin-top: 10px;">总价格：<span id="totalPrice">¥0</span></p>
+
+  <script>
+    // 1. 定义初始商品列表
+    const cartData = [
+      { id: 1, name: "算法导论", date: "2006-9", price: 85, count: 1 },
+      { id: 2, name: "Unix编程艺术", date: "2006-2", price: 59, count: 2 },
+      { id: 3, name: "编程珠玑", date: "2008-10", price: 39, count: 2 },
+    ];
+
+    const cartTbody = document.getElementById("cartTbody");
+    const totalPriceEl = document.getElementById("totalPrice");
+    const emptyTip = document.getElementById("emptyTip");
+
+    // 2. 渲染表格
+    function renderCart() {
+      // 如果 cartData 为空数组，则显示“购物车中没有商品”
+      if (cartData.length === 0) {
+        cartTbody.innerHTML = "";
+        emptyTip.style.display = "block";
+        totalPriceEl.textContent = "¥0";
+        return;
+      } else {
+        emptyTip.style.display = "none";
+      }
+
+      // 否则，生成表格行
+      let rowsHTML = "";
+      cartData.forEach((item, index) => {
+        rowsHTML += `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.date}</td>
+            <td>¥${item.price}</td>
+            <td>
+              <button class="btn" onclick="decrement(${index})">-</button>
+              <span>${item.count}</span>
+              <button class="btn" onclick="increment(${index})">+</button>
+            </td>
+            <td>
+              <button class="btn" onclick="removeItem(${index})">移除</button>
+            </td>
+          </tr>
+        `;
+      });
+      cartTbody.innerHTML = rowsHTML;
+
+      // 计算总价
+      calcTotalPrice();
+    }
+
+    // 3. 加减数量
+    function increment(idx) {
+      cartData[idx].count++;
+      renderCart();
+    }
+    function decrement(idx) {
+      // 数量不能<1
+      if (cartData[idx].count > 1) {
+        cartData[idx].count--;
+      }
+      renderCart();
+    }
+
+    // 4. 移除商品
+    function removeItem(idx) {
+      cartData.splice(idx, 1); // 移除数组中的一项
+      renderCart();
+    }
+
+    // 5. 计算并更新总价格
+    function calcTotalPrice() {
+      let total = 0;
+      cartData.forEach(item => {
+        total += item.price * item.count;
+      });
+      totalPriceEl.textContent = "¥" + total;
+    }
+
+    // 页面加载时先渲染一次
+    renderCart();
+  </script>
+
+</body>
+</html>

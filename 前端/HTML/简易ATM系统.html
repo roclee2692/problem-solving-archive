@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>简易ATM系统</title>
+</head>
+<body>
+    <script>
+        let balance = 0;
+
+        while (true) {
+            let choice = prompt("欢迎使用简易ATM系统\n请选择操作：\n1: 存款\n2: 取款\n0: 退出");
+            
+            if (choice === "1") {
+                let deposit = prompt("请输入存款金额：");
+                deposit = parseFloat(deposit);
+                
+                if (isNaN(deposit) || deposit <= 0) {
+                    alert("无效的金额，请输入正数。");
+                } else {
+                    balance += deposit;
+                    alert(`存款成功！当前余额为：${balance.toFixed(2)}¥`);
+                }
+            } else if (choice === "2") {
+                let withdrawal = prompt("请输入取款金额：");
+                withdrawal = parseFloat(withdrawal);
+                
+                if (isNaN(withdrawal) || withdrawal <= 0) {
+                    alert("无效的金额，请输入正数。");
+                } else if (withdrawal > balance) {
+                    alert("余额不足，无法完成取款。");
+                } else {
+                    balance -= withdrawal;
+                    alert(`取款成功！当前余额为：${balance.toFixed(2)}¥`);
+                }
+            } else if (choice === "0") {
+                alert("感谢使用，再见！");
+                break;
+            } else {
+                alert("无效的选择，请重新输入。");
+            }
+        }
+    </script>
+</body>
+</html>

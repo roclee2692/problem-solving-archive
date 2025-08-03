@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>导航栏和侧边栏布局示例</title>
+    <style>
+        /* 重置默认样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            text-align: center;
+            background-color: rgb(37, 195, 223);
+            color: #fff;
+            line-height: 50px;
+            padding: 5px;
+            z-index: 1000;
+        }
+
+        /* 侧边栏样式 */
+        aside {
+            float: left;
+            width: 200px;   
+            text-align: center;
+            background-color: #f03333;
+            min-height: calc(100vh - 60px);
+            padding:60px;
+        }
+
+        /* 主内容区样式 */
+        main {
+            margin-left: 200px; /* 侧边栏宽度 + 20px间距 */
+            margin-top: 60px; /* 避免被固定导航栏覆盖 */
+            padding: 20px;
+            text-align: center;
+            background-color: rgb(45, 209, 58);
+            min-height: calc(100vh - 60px);
+        }
+       
+        /* 清除浮动 */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        footer{
+            text-align: center;
+            background-color: rgb(89, 45, 209);
+            min-height: 10px;
+        }
+
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            aside {
+                float: none;
+                width: 100%;
+                height: auto;
+                margin-top: 60px;
+            }
+
+            main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        导航栏
+    </nav>
+
+    <div class="clearfix">
+        <aside>
+            侧边栏内容
+        </aside>
+
+        <main>
+            <h1>主内容区</h1>
+            <p>这里是主内容区域，可以放置文章、图片等内容。</p>
+        </main>
+    </div>
+
+    <footer>
+        页脚
+    </footer>
+
+</body>
+</html>

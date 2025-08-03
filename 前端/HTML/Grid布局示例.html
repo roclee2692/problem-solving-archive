@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    /* 全局样式重置，去除默认边距与内边距，统一盒模型 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /*
+      .container
+      - 设置整体容器的宽度、高度，并居中
+      - 背景色为黑色，隐藏溢出内容
+    */
+    .container {
+      width: 70%;
+      height: 700px;
+      margin: 0 auto;/*居中*/
+      padding-top: 20px;    /* 给顶部留一些空隙 */
+      background-color: rgb(232, 89, 151);
+      overflow: hidden;     /* 多余内容在容器外部不显示 */
+    }
+
+    /*
+      .box
+      - 使用CSS Grid布局
+      - 指定宽度和高度作为网格容器
+      - 设置背景色与网格区域命名
+      - gap: 10px 让网格项之间有10px间距
+    */
+    .box {
+      display: grid;
+      width: 600px;
+      height: 600px;
+      background-color: #e84cd6;
+      /* grid-template-rows: repeat(4, 1fr);  
+         grid-template-columns: repeat(4, 1fr);
+         若想要4行4列，可取消注释 */
+      grid-template-areas:
+        "part1 part1 part2"
+        "part1 part1 part2"
+        "part3 part4 part5";
+      gap: 10px;
+    }
+
+    /*
+      .item
+      - 每个网格项目的基本样式
+      - 宽高100%表示占满自身所在网格区
+      - 背景色aqua，边框辅助查看范围
+    */
+    .item {
+      width: 100%;
+      height: 100%;
+      background-color: aqua;
+      border: 1px solid #000;
+    }
+
+    /* 
+      根据nth-child指定每个 .item 对应的命名网格区域 
+      grid-area必须与 grid-template-areas 中的名称对应
+    */
+    .item:nth-child(1) {
+      grid-area: part1;
+    }
+    .item:nth-child(2) {
+      grid-area: part2;
+    }
+    .item:nth-child(3) {
+      grid-area: part3;
+    }
+    .item:nth-child(4) {
+      grid-area: part4;
+    }
+    .item:nth-child(5) {
+      grid-area: part5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box">
+      <!-- 5个网格元素，分别对应 part1 ~ part5 区域 -->
+      <div class="item">11</div>
+      <div class="item">21</div>
+      <div class="item">31</div>
+      <div class="item">41</div>
+      <div class="item">51</div>
+    </div>
+  </div>
+</body>
+</html>

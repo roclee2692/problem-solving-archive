@@ -1,0 +1,32 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  .container {
+    display: grid; /* 激活Grid布局 */
+    grid-template-columns: repeat(3, 1fr); /* 创建3列，宽度相等 */
+    grid-gap: 20px; /* 设置网格项之间的间隙 */
+  }
+  
+  .title {
+    grid-column: 1 / 2; /* 占据第一列 */
+    background-color: #63c4f2;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .image {
+    grid-column: 2 / 3; /* 占据第二列 */
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .paragraph {
+    grid-column: 3 / 4; /* 占据第三列 */
+    background-color: #f9f9f9;
+    padding: 10px;
+  }
+  

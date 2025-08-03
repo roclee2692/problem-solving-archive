@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+  <style>
+    /* 全局重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /*
+      .container
+      - 使用Flex布局
+      - flex-direction: row 使子元素按水平方向排列
+      - justify-content: space-evenly 主轴上等间距分配
+      - align-items: center 交叉轴上居中
+      - 指定宽高并设置背景色 
+    */
+    .container {
+      display: flex;
+      flex-direction: row;       /* row | row-reverse | column | column-reverse */
+      /* flex-wrap: wrap;        允许子元素换行，可根据需求启用 */
+      justify-content: space-evenly; /* 主轴上均匀分布子元素 */
+      align-items: center;           /* 纵向居中对齐 */
+
+      width: 700px;
+      height: 700px;
+      background-color: rgb(25, 120, 22);
+    }
+
+    /*
+      .box
+      - 每个子元素的基本样式
+      - background-color 为blueviolet
+      - 通过 margin: 5px 分隔
+      - order 用于设置排序
+      - flex: 1 表示可伸缩分配剩余空间
+    */
+    .box {
+      /* width: 100px;
+         height: 10px;   */
+         /* 若想固定大小可取消注释 */
+      background-color: rgb(44, 189, 202);
+      margin: 9px;
+
+      /* order: 2;
+         若不需要固定默认顺序，可注释或删除 */
+      order: 3;  
+
+      /*
+        flex: 1; 
+        等效于:
+        flex-grow: 1;    // 剩余空间按比例分配
+        flex-shrink: 1;  // 空间不足时按比例收缩
+        flex-basis: 0;   // 初始尺寸(可结合width使用)
+      */
+      flex: 1;
+    }
+
+    /*
+      .order9
+      - 修改默认的order为1，让它在其它order为2的box之前出现
+    */
+    .order9 {
+      order: 4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 若没有特意设置 .order9, 默认order是2，这个class可以改变排序 -->
+    <div class="box">1</div>
+    <div class="box">2</div>
+    <div class="box">3</div>
+    <div class="box">4</div>
+    <!-- 这里的第5个box被设为 order9，因此会比其他 order=2 的box更靠前 -->
+    <div class="box order9">5</div>
+    <div class="box">6</div>
+    <div class="box">7</div>
+    <div class="box">8</div>
+    <div class="box">9</div>
+  </div>
+</body>
+</html>

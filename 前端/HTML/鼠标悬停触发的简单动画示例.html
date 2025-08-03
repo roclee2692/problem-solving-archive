@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    /*
+      全局通配符，清除默认边距和内边距，设置盒模型为border-box
+      以便更好地控制元素宽高。
+    */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /*
+      .container
+      - 容器宽度700px，高度500px
+      - 背景色 #ccc，且利用 margin: 0 auto 实现水平居中
+      - padding: 1px只是做一个微小的内边距，用于区分
+      - position: relative 让内部的绝对定位元素（.container:before 或 .box）定位参照
+    */
+    .container {
+      width: 700px;
+      height: 500px;
+      background-color: #27a4c1;
+      margin: 0 auto;
+      padding: 1px;
+      position: relative;
+    }
+
+    /*
+      .container::before
+      - 使用伪元素在容器内插入一条2px宽、全高的黑色竖线
+      - 初始位置：top:0; left:50%; (居中放置)
+      - 当鼠标悬停在 .container 上时，会对 .box 产生交互影响（见 .container:hover .box）
+    */
+    .container::before {
+      content: "ags";
+      display: block;
+      width: 20px;
+      height: 100%;
+      background-color: rgb(223, 62, 196);
+      position: absolute;
+      top: 0;
+      left: 50%;
+    }
+
+    /*
+      .container:hover .box 
+      - 当鼠标悬停容器时，让所有 .box 的left值变为 calc(100% - 50px)
+      - 也就是说，当鼠标悬停后，这些小方块会从原位置移动到容器右边，留下50px的空隙
+    */
+    .container:hover .box {
+      left: calc(100% - 50px);
+    }
+
+    /*
+      .box
+      - 每个小方块
+      - 宽50px、高20px，背景黑色
+      - 绝对定位，相对于 .container
+      - 统一将 left 初始值设为 0 (最左侧)
+      - top 值在每个 nth-child 中个性化指定
+    */
+    .box {
+      width: 50px;
+      height: 20px;
+      background-color: rgb(15, 51, 160);
+      position: absolute;
+      left: 0;
+    }
+
+    /*
+      1号方块
+      - top: 0; 放置在最上方
+      - transition: left 5s ease; 当 left 改变时，以5秒 + ease函数移动
+    */
+    .box:nth-child(1) {
+      top: 0;
+      transition: left 5s ease;
+    }
+
+    /*
+      2号方块
+      - top: 30px; 稍微往下
+      - transition: left 5s ease-in; 进入时加速度
+    */
+    .box:nth-child(2) {
+      top: 30px;
+      transition: left 5s ease-in;
+    }
+
+    /*
+      3号方块
+      - top: 60px; 再往下
+      - transition: left 5s ease-out; 移动末段减速
+    */
+    .box:nth-child(3) {
+      top: 60px;
+      transition: left 5s ease-out;
+    }
+
+    /*
+      4号方块
+      - top: 90px;
+      - transition: left 5s ease-in-out; 开头加速+末尾减速
+    */
+    .box:nth-child(4) {
+      top: 90px;
+      transition: left 5s ease-in-out;
+    }
+
+    /*
+      5号方块
+      - top: 120px;
+      - transition: left 5s linear; 匀速移动
+    */
+    .box:nth-child(5) {
+      top: 120px;
+      transition: left 5s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box">x</div>
+    <div class="box">x</div>
+    <div class="box">x</div>
+    <div class="box">x</div>
+    <div class="box">x</div>
+  </div>
+</body>
+</html>

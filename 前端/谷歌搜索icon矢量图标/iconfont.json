@@ -1,0 +1,30 @@
+{
+  "id": "4806284",
+  "name": "谷歌搜索框",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1075",
+      "name": "照相机",
+      "font_class": "zhaoxiangji",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "4406942",
+      "name": "搜索",
+      "font_class": "sousuo",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "5387486",
+      "name": "语音",
+      "font_class": "yuyin",
+      "unicode": "eae6",
+      "unicode_decimal": 60134
+    }
+  ]
+}

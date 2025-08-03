@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>2</title>
+  <style>
+    /* 简单样式，参考截图 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .phone-container {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .phone-container h2 {
+      margin-bottom: 10px;
+    }
+    .phone-container p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>手机类实例化</h1>
+
+  <!-- 卡片容器（iPhoneX信息） -->
+  <div class="phone-container" id="iphoneCard">
+    <h2>iPhone 信息</h2>
+    <p>型号: <span id="iphoneType"></span></p>
+    <p>价格: ¥<span id="iphonePrice"></span></p>
+    <p>颜色: <span id="iphoneColor"></span></p>
+    <p>屏幕大小: <span id="iphoneSize"></span>英寸</p>
+  </div>
+
+  <!-- 卡片容器（Huawei信息） -->
+  <div class="phone-container" id="huaweiCard">
+    <h2>Huawei 信息</h2>
+    <p>型号: <span id="huaweiType"></span></p>
+    <p>价格: ¥<span id="huaweiPrice"></span></p>
+    <p>颜色: <span id="huaweiColor"></span></p>
+    <p>屏幕大小: <span id="huaweiSize"></span>英寸</p>
+  </div>
+
+  <script>
+    /*
+      1. 定义一个构造函数Phone
+         用于创建手机对象，包括：type(型号), price(价格), color(颜色), size(屏幕大小)
+    */
+    function Phone(type, price, color, size) {
+      // this指向新创建的对象
+      this.type = type;
+      this.price = price;
+      this.color = color;
+      this.size = size;
+    }
+
+    /*
+      2. 实例化两部手机
+         iPhoneX 与 p30 pro
+    */
+    const iphoneX = new Phone("iPhoneX", 6999, "土豪金", 5.8);
+    const huawei = new Phone("p30pro", 5988, "极光蓝", 6.1);
+
+    /*
+      3. 将这两个对象的数据放入网页对应区域
+    */
+    // iPhone信息
+    document.getElementById("iphoneType").textContent = iphoneX.type;
+    document.getElementById("iphonePrice").textContent = iphoneX.price;
+    document.getElementById("iphoneColor").textContent = iphoneX.color;
+    document.getElementById("iphoneSize").textContent = iphoneX.size;
+
+    // Huawei信息
+    document.getElementById("huaweiType").textContent = huawei.type;
+    document.getElementById("huaweiPrice").textContent = huawei.price;
+    document.getElementById("huaweiColor").textContent = huawei.color;
+    document.getElementById("huaweiSize").textContent = huawei.size;
+  </script>
+</body>
+</html>

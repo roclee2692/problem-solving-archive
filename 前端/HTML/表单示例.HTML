@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>表单示例</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .form-item {
+      margin: 20px 0;
+    }
+    label {
+      display: inline-block;
+      width: 60px;
+    }
+  </style>
+</head>
+<body>
+  <h2>用户信息填写</h2>
+  <form id="userForm">
+    <div class="form-item">
+      <label>用户名:</label>
+      <input type="text" name="username" placeholder="请输入用户名" value="admin" />
+    </div>
+
+    <div class="form-item">
+      <label>密码:</label>
+      <input type="password" name="password" value="123456" />
+    </div>
+
+    <div class="form-item">
+      <label>年龄:</label>
+      <input type="number" name="age" value="20" />
+    </div>
+
+    <div class="form-item">
+      <label>性别:</label>
+      <input type="radio" name="gender" value="男" checked />男
+      <input type="radio" name="gender" value="女" />女
+    </div>
+
+    <div class="form-item">
+      <label>爱好:</label>
+      <input type="checkbox" name="hobby" value="吃饭" checked />吃饭
+      <input type="checkbox" name="hobby" value="睡觉" checked />睡觉
+    </div>
+
+    <div class="form-item">
+      <label>城市:</label>
+      <select name="city">
+        <option value="北京">北京</option>
+        <option value="上海">上海</option>
+        <option value="武汉" selected>武汉</option>
+        <option value="广州">广州</option>
+      </select>
+    </div>
+
+    <div class="form-item">
+      <label>个人签名:</label>
+      <textarea name="signature" rows="3" cols="20">武汉中地</textarea>
+    </div>
+
+    <button type="submit">提交</button>
+  </form>
+
+  
+  <h3>填写结果：</h3>
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("userForm");
+    const result = document.getElementById("result");
+
+    // 监听表单提交事件
+    form.addEventListener("submit", function(e) {
+      e.preventDefault(); // 阻止默认提交刷新页面
+
+      // 收集表单数据
+      const formData = new FormData(form);
+      const username = formData.get("username");
+      const password = formData.get("password");
+      const age = formData.get("age");
+      const gender = formData.get("gender");
+      const city = formData.get("city");
+      const signature = formData.get("signature");
+
+      // hobbies 可能有多个值
+      const hobbies = formData.getAll("hobby"); // 这里返回一个数组
+
+      // 在页面下方显示结果
+      result.innerHTML = `
+        <p>用户名：${username}</p>
+        <p>密码：${password}</p>
+        <p>年龄：${age}</p>
+        <p>性别：${gender}</p>
+        <p>爱好：${hobbies.join("，")}</p>
+        <p>城市：${city}</p>
+        <p>个人签名：${signature}</p>
+      `;
+    });
+  </script>
+</body>
+</html>

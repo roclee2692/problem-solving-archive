@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    ios::sync_with_stdio(0);cin.tie(0);
+
+    int n;
+    cin >> n;
+    vector<string> str(n);
+    for(int i=0; i<n; i++){
+        int tmp;
+        cin >> tmp;
+        str[i] = to_string(tmp);
+    }
+
+    int cnt = 0;
+    // 当前正在使用的数字下标
+    int i = 0;
+
+    // 当还没到最后一个数字时，不断寻找能和 str[i] 接上的下一个数字
+    while(i < n - 1){
+        // 准备从下一个位置开始找
+        int j = i + 1;
+        // 看看能否找得到首尾匹配的数字
+        while(j < n && str[i].back() != str[j].front()){
+            // 每跳过一个不匹配的数字，计数加 1
+            cnt++;
+            j++;
+        }
+        // 如果跳到 j == n，说明后面都没有能接上的数字了，直接退出
+        if(j == n) break;
+        // 找到了能接上的数字，把 i 移动到 j
+        i = j;
+    }
+
+    cout << cnt << endl;
+    return 0;
+}

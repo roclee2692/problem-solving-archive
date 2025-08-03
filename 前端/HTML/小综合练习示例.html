@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>小综合练习示例</title>
+  <style>
+    /* 公共样式 */
+    body {
+      font-family: "微软雅黑", sans-serif;
+      margin: 20px;
+    }
+
+    /* 标题居中公共样式，可单独封装为一个通用类 */
+    .title-center {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    /* 日期、参与人数与操作区等可使用淡灰色或其他色彩 */
+    .info-bar {
+      text-align: center; /* 保持与标题整体风格一致 */
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* 看起来像链接，但实则不是真正的 <a> 链接 */
+    .link-like {
+      color: #2196F3;          /* 通常链接会用蓝色 */
+      text-decoration: underline; /* 添加下划线 */
+      cursor: pointer;           /* 鼠标悬停时表现为可点击 */
+    }
+
+    /* 真正的链接，但要去掉下划线 */
+    a.link-no-underline {
+      color: #2196F3;
+      text-decoration: none;     /* 去掉默认下划线 */
+      margin-left: 10px;         /* 与前面的内容适当留点距离 */
+    }
+    a.link-no-underline:hover {
+      text-decoration: underline; /* 悬停时可加下划线，增强交互感 */
+    }
+
+    /* 段落设置首行缩进为 2 字符（2em） */
+    p {
+      text-indent: 2em;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 标题 -->
+  <h1 class="title-center">加强反垄断监管是为了更好发展</h1>
+
+  <!-- 日期、阅读次数等信息区域 -->
+  <div class="info-bar">
+    2020年12月20日　 
+    <span class="link-like">腾讯新闻</span>　
+    <span>(20人参与)</span>
+    <!-- “收藏”是真实链接，但不显示下划线 -->
+    <a href="#" class="link-no-underline">收藏</a>
+  </div>
+
+  <!-- 正文内容：首行缩进两个字符 -->
+  <p>近日，中央经济工作会议指出，在前期构建的基础上，对垄断和不正当竞争企业实行“一罚一警”双管齐下的立法建议。通过加强监管，这是我国互联网领域和平台经济走向健康发展的重要一步。</p>
+  <p>近年来，在多领域出现了比较明显的市场垄断和无序扩张现象。满足人民日益增长的美好生活需求是不断拓宽监管的重要目标。但与此同时，线上与线下资源错配，部分平台盲目扩张与激烈的恶性竞争，导致了市场的不规范以及消费者权益受到威胁。</p>
+  <p>本次会议强调，要持续完善市场监管法制建设，着力鼓励科技创新和公平竞争。关于平台企业的规范经营与数据隐私保护也再次被提到议事日程中。未来，数字经济的发展趋势仍然值得期待。</p>
+
+  <!-- 类似“阅读剩余全文” -->
+  <p style="margin-top: 20px; text-align: center;">
+    <a href="#" class="link-no-underline">阅读剩余全文</a>
+  </p>
+</body>
+</html>

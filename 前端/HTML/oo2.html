@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- 设置字符集为UTF-8 -->
+    <meta charset="UTF-8" />
+    <!-- 设置视口宽度为设备宽度，初始化缩放比例为1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 引入Mapbox样式 -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <!-- 引入Mapbox GL JS脚本 -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+    <title>Document</title>
+    <style>
+      /* 全局样式设置，移除所有元素的外边距和内边距 */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 设置地图容器 */
+      #map {
+        width: 100%; /* 宽度为100% */
+        height: 100vh; /* 高度为100视口高度 */
+      }
+
+      /* 设置选择框的样式 */
+      select {
+        position: absolute;
+        top: 30px; /* 距离顶部30px */
+        left: 30px; /* 距离左侧30px */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 创建地图容器 -->
+    <div id="map"></div>
+
+    <!-- 创建一个下拉选择框 -->
+    <select id="sel">
+      <!-- 提供默认提示选项 -->
+      <option value="null">请选择</option>
+    </select>
+
+    <script>
+      // 设置Mapbox访问令牌
+      mapboxgl.accessToken =
+        `pk.eyJ1IjoiemhvbmdkaXNodW1hIiwiYSI6ImNsNXJoYXR5eTI2bGgzZW53d2didWF1c3AifQ.6vOplM2NQc_xnJW3aA5ZBA`;
+
+      // 创建一个Mapbox地图实例
+      new mapboxgl.Map({
+        container: "map", // 地图容器ID
+        style: 'mapbox://styles/mapbox/dark-v11', // 地图样式
+        center: [114.3, 38.5], // 地图初始中心位置
+        zoom: 1, // 初始缩放级别
+        projection: 'globe', // 设置投影方式为地球形状
+      });
+
+      // 监听地图样式加载事件
+      map.on('style.load', () => {
+        // 向地图中添加一个GeoJSON数据源
+        map.addSource('geojson', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [], // 初始没有任何要素
+          },
+        });
+
+        // 向地图中添加一个填充层
+        map.addLayer({
+          id: 'fill', // 图层ID
+          type: 'fill', // 图层类型为填充
+          source: 'geojson', // 数据来源为之前添加的GeoJSON数据源
+          paint: {
+            'fill-color': '#ff0000', // 填充颜色为红色
+            'fill-opacity': 0.5, // 填充透明度为50%
+          },
+        });
+      });
+
+      // 获取选择框元素
+      const sel = document.querySelector('#sel');
+      // 创建一个Mapbox标记实例
+      const marker = new mapboxgl.Marker();
+
+      // 监听选择框的变化事件
+      sel.onchange = function (e) {
+        // 如果未选择任何区域，直接返回
+        if (e.target.value == 'null') {
+          return;
+        }
+
+        // 获取选择的区域的GeoJSON数据
+        fetch(`https://geo.dataviv.aliyun.com/areas_v3/bound/${e.target.value}_full.json`)
+          .then((res) => res.json()) // 解析返回的JSON数据
+          .then((data) => {
+            // 更新地图上的GeoJSON数据源
+            map.getSource('geojson').setData(data);
+
+            // 获取区域几何的中心坐标
+            const center = data.features[0].properties.centroid;
+            // 将标记设置到该中心位置，并将其添加到地图中
+            marker.setLngLat(center).addTo(map);
+
+            // 使用飞行效果飞到该中心，并设置缩放级别
+            map.flyTo({
+              center,
+              zoom: 6,
+            });
+          });
+      };
+
+      // 获取区域列表并填充到选择框中
+      fetch('https://geo.dataviv.aliyun.com/areas_v3/bound/100000_full.json')
+        .then((res) => res.json())
+        .then((data) => {
+          data.features.forEach((feature) => {
+            // 为每个区域创建一个选项
+            const option = document.createElement('option');
+            option.innerText = feature.properties.name; // 区域名称
+            option.value = feature.properties.adcode; // 区域的adcode
+            // 将选项添加到选择框中
+            sel.appendChild(option);
+          });
+        });
+    </script>
+  </body>
+</html>

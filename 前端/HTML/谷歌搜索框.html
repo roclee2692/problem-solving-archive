@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 指定字符集为UTF-8，支持中文等多种字符 -->
+  <meta charset="UTF-8" />
+  <!-- 设置视口大小适应移动端设备，初始缩放比为1.0 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 引入iconfont样式文件，其中包含搜索图标、语音图标、相机图标等矢量图标的定义 -->
+  <link rel="stylesheet" href="./谷歌搜索icon矢量图标/iconfont.css" />
+  <title>Document</title>
+</head>
+<style>
+  /*
+    全局通配符选择器，清除默认的margin和padding，
+    并将box-sizing设为border-box，以便更直观地控制元素宽高。
+  */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /*
+    .search-input:
+    - 用于包裹搜索相关的图标及输入框的容器
+    - 通过宽高、圆角、阴影等实现简洁风格
+    - position: relative 使内部子元素可通过绝对定位相对该容器进行定位
+  */
+  .search-input {
+    width: 746px;            /* 容器宽度 */
+    height: 50px;            /* 容器高度 */
+    margin: 0 auto;          /* 使容器在页面中水平居中 */
+    border-radius: 25px;     /* 圆角（50px高的一半） */
+    box-shadow: 0 0 6px #ccc;/* 边框阴影，为容器添加轻微立体感 */
+    position: relative;      /* 为内部绝对定位提供参照 */
+    top: 200px;              /* 离页面顶部200px */
+    user-select: none;       /* 禁止选中容器内容（可根据需求调整） */
+  }
+
+  /*
+    .icon-sousuo:
+    - 搜索图标，使用绝对定位，让它在search-input容器内的左侧居中对齐
+    - transform: translateY(-50%) 用来使元素在父级容器的垂直方向上完美居中
+  */
+  .icon-sousuo {
+    position: absolute;
+    left: 20px;           /* 距离容器左边20px */
+    top: 50%;             /* 垂直方向上定位在容器50%处 */
+    transform: translateY(-50%); /* 再向上移动自身一半高度，从而垂直居中 */
+  }
+
+  /*
+    .search-input > input:
+    - 搜索输入框本身
+    - 通过绝对定位使其相对于父容器摆放在合适位置
+    - left: 50px; 让它紧跟在搜索图标后面
+    - 去掉默认边框和outline，防止聚焦后出现高亮边框
+    - 字体大小18px，指定常用字体，以提升兼容性和美观度
+  */
+  .search-input > input {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 400px;               /* 输入框宽度 */
+    border: none;               /* 去除默认输入框边框 */
+    outline: none;              /* 去除聚焦边框 */
+    font-size: 18px;            /* 字体大小 */
+    font-family: 'Segoe UI', Arial, 'Microsoft Yahei', sans-serif; 
+  }
+
+  /*
+    .icon-yuyin:
+    - 语音输入图标，位于搜索框右侧
+    - right: 50px; 保证与相机图标之间有一定间距
+  */
+  .icon-yuyin {
+    position: absolute;
+    right: 50px;           /* 相对容器右侧距离 */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;       /* 图标尺寸 */
+  }
+
+  /*
+    .icon-zhaoxiangji:
+    - 相机图标，同样绝对定位到右侧，不过比语音图标更靠右
+    - right: 20px; 与语音图标之间留出30px距离
+  */
+  .icon-zhaoxiangji {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+  }
+</style>
+<body>
+  <!--
+    外层容器.search-input，内部依次放置搜索图标、输入框、语音图标、相机图标
+    - i.iconfont: 通过iconfont.css中定义的icon-sousuo/icon-yuyin/icon-zhaoxiangji类
+      来显示特定的矢量图标
+    - 这里写了“x”只是占位符文本，在引入iconfont文件后会显示对应图标
+  -->
+  <div class="search-input">
+    <i class="iconfont icon-sousuo"></i>
+    <input type="text" placeholder="在Google中搜索，或输入网址" />
+    <i class="iconfont icon-yuyin"></i>
+    <i class="iconfont icon-zhaoxiangji"></i>
+  </div>
+</body>
+</html>

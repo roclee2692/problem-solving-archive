@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+  <style>
+    /* 重置全局样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /*
+      .container
+      - 容器大小400x400px，背景色 #ccc
+      - margin: 0 auto居中
+      - position: relative，为内部绝对定位元素提供定位参照
+    */
+    .container {
+      width: 400px;
+      height: 400px;
+      background-color: #55d8f3;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /*
+      .box
+      - 小方块：50x50 px，圆角50%形成圆形
+      - 背景色blueviolet，绝对定位居中：left: 50%, transform: translate(-50%, 0)
+      - 使用 animation: move 1s ease-in infinite alternate
+        表示引用名为“move”的动画序列
+        1s时长
+        ease-in缓动
+        infinite无限次播放
+        alternate在一次动画结束后反向播放
+    */
+    .box {
+      width: 50px;
+      height: 50px;
+      background-color: rgb(162, 226, 43);
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0);
+      animation: move 1.5s ease-in infinite alternate;
+    }
+
+    /*
+      .glass
+      - 宽度100%，高度50px，背景色绿色
+      - transform: translateY(350px) 放置在容器底部
+      - 用于观察小方块是否会被覆盖或配合动画变化（具体逻辑由需求决定）
+    */
+    .glass {
+      width: 100%;
+      height: 50px;
+      background-color: green;
+      transform: translateY(350px);
+    }
+
+    /*
+      @keyframes move
+      - 关键帧动画，名字为 move
+      - 0%：位于 translate(-50%,0) 即容器的水平中心、顶部位置
+      - 90%：向下移动到 translate(-50%, 300px)，scale(1) 大小不变
+      - 100%：向下再移动一点 transform: translate(-50%, 325px)，同时放大 scale(1.2, 0.5)，表现为水平拉伸
+    */
+    @keyframes move {
+      0% {
+        transform: translate(-50%, 0);
+      }
+      90% {
+        transform: translate(-50%, 300px) scale(1,1);
+      }
+      100% {
+        transform: translate(-50%, 325px) scale(1.2, 0.5);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box"> your  heart</div>
+    <div class="glass"></div>
+  </div>
+</body>
+</html>

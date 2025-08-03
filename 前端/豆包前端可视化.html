@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尼克工作调度问题可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36D399',
+                        accent: '#8B5CF6',
+                        neutral: '#1F2937',
+                        'base-100': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .task-bar {
+                @apply rounded-md transition-all duration-300 ease-in-out;
+            }
+            .dp-cell {
+                @apply border border-gray-200 text-center py-2 px-1 transition-all duration-300;
+            }
+            .dp-cell-active {
+                @apply bg-primary/20 font-bold;
+            }
+            .timeline-line {
+                @apply h-1 bg-gray-300 relative;
+            }
+            .timeline-point {
+                @apply absolute h-4 w-4 rounded-full -top-1.5 border-2 border-white transform -translate-x-1/2 cursor-pointer transition-all duration-300;
+            }
+            .timeline-point-active {
+                @apply scale-150 z-10;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-all duration-300;
+            }
+            .btn-secondary {
+                @apply bg-gray-200 hover:bg-gray-300 text-neutral font-medium py-2 px-4 rounded-md transition-all duration-300;
+            }
+        }
+    </style>
+</head>
+<body class="bg-base-100 font-sans text-neutral">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-neutral mb-2">尼克工作调度问题可视化</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">通过动态规划算法，优化尼克的工作安排，最大化他的空闲时间</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 输入区域 -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-sliders text-primary mr-2"></i>输入参数
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">工作日总分钟数 (n)</label>
+                        <input type="number" id="totalMinutes" value="15" min="1" max="100" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">任务数量 (k)</label>
+                        <input type="number" id="taskCount" value="6" min="1" max="20" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+                    </div>
+                    
+                    <div id="taskInputs" class="space-y-3 mt-4">
+                        <div class="font-medium text-gray-700 mb-2">任务详情</div>
+                        <div class="task-input bg-gray-50 p-3 rounded-md flex items-center">
+                            <div class="w-1/2 pr-2">
+                                <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                                <input type="number" value="1" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <div class="w-1/2 pl-2">
+                                <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                                <input type="number" value="2" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="task-input bg-gray-50 p-3 rounded-md flex items-center">
+                            <div class="w-1/2 pr-2">
+                                <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                                <input type="number" value="1" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <div class="w-1/2 pl-2">
+                                <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                                <input type="number" value="6" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="task-input bg-gray-50 p-3 rounded-md flex items-center">
+                            <div class="w-1/2 pr-2">
+                                <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                                <input type="number" value="4" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <div class="w-1/2 pl-2">
+                                <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                                <input type="number" value="11" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="addTask" class="w-full btn-secondary flex items-center justify-center">
+                        <i class="fa fa-plus mr-2"></i>添加任务
+                    </button>
+                    
+                    <button id="runAlgorithm" class="w-full btn-primary flex items-center justify-center mt-4">
+                        <i class="fa fa-play mr-2"></i>运行算法
+                    </button>
+                    
+                    <div id="presets" class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">预设案例</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="preset-btn btn-secondary text-sm py-1" data-preset="small">简单案例</button>
+                            <button class="preset-btn btn-secondary text-sm py-1" data-preset="medium">中等案例</button>
+                            <button class="preset-btn btn-secondary text-sm py-1" data-preset="large">复杂案例</button>
+                            <button class="preset-btn btn-secondary text-sm py-1" data-preset="custom">自定义</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 可视化区域 -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- 结果摘要 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-bar-chart text-primary mr-2"></i>结果摘要
+                    </h2>
+                    
+                    <div id="resultSummary" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 mb-1">总空闲时间</div>
+                                <div id="totalIdleTime" class="text-2xl font-bold text-primary">0</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 mb-1">总工作时间</div>
+                                <div id="totalWorkTime" class="text-2xl font-bold text-accent">0</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 mb-1">选择的任务数</div>
+                                <div id="selectedTasksCount" class="text-2xl font-bold text-secondary">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-medium text-gray-700">选择的任务</h3>
+                            <div class="flex space-x-2">
+                                <button id="playAnimation" class="btn-primary text-sm py-1 px-3 flex items-center">
+                                    <i class="fa fa-play mr-1"></i> 播放动画
+                                </button>
+                                <button id="prevStep" class="btn-secondary text-sm py-1 px-3 flex items-center">
+                                    <i class="fa fa-step-backward mr-1"></i> 上一步
+                                </button>
+                                <button id="nextStep" class="btn-secondary text-sm py-1 px-3 flex items-center">
+                                    <i class="fa fa-step-forward mr-1"></i> 下一步
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="selectedTasksList" class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <div id="initialMessage" class="text-center py-8 text-gray-500">
+                        <i class="fa fa-info-circle text-3xl mb-3 text-gray-400"></i>
+                        <p>请设置参数并运行算法以查看结果</p>
+                    </div>
+                </div>
+                
+                <!-- 时间线可视化 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-clock-o text-primary mr-2"></i>时间线可视化
+                    </h2>
+                    
+                    <div id="timelineContainer" class="relative">
+                        <div id="timeline" class="timeline-line w-full"></div>
+                        
+                        <div id="timeLabels" class="flex justify-between mt-2 text-xs text-gray-500">
+                            <!-- 动态生成时间标签 -->
+                        </div>
+                        
+                        <div id="tasksContainer" class="relative mt-4 h-24">
+                            <!-- 任务条将动态生成在这里 -->
+                        </div>
+                        
+                        <div id="currentTimeIndicator" class="absolute top-0 left-0 h-6 w-px bg-red-500 transform -translate-x-1/2 -translate-y-1/2 z-20 hidden">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                                t = <span id="currentTimeValue">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DP表可视化 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-table text-primary mr-2"></i>动态规划表
+                    </h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table id="dpTable" class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-2 font-medium text-left">时间 (i)</th>
+                                    <th class="px-2 py-2 font-medium text-left">任务</th>
+                                    <th class="px-2 py-2 font-medium text-left">状态转移</th>
+                                    <th class="px-2 py-2 font-medium text-left">dp[i]</th>
+                                    <th class="px-2 py-2 font-medium text-left">决策</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dpTableBody">
+                                <!-- 动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p class="mb-2"><span class="inline-block w-3 h-3 bg-primary/20 rounded-sm mr-1"></span> 当前处理的时间点</p>
+                        <p><span class="inline-block w-3 h-3 bg-secondary/20 rounded-sm mr-1"></span> 选中的任务路径</p>
+                    </div>
+                </div>
+                
+                <!-- 算法解释 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-book text-primary mr-2"></i>算法解释
+                    </h2>
+                    
+                    <div class="space-y-4 text-gray-700">
+                        <p>尼克工作调度问题使用动态规划算法求解，目标是最大化尼克的空闲时间。</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-medium mb-2">状态定义</h3>
+                            <p>dp[i] 表示从第 i 分钟开始到工作日结束的最大空闲时间</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-medium mb-2">状态转移方程</h3>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>当第 i 分钟没有任务开始时：<code class="bg-gray-200 px-1 rounded">dp[i] = dp[i+1] + 1</code></li>
+                                <li>当第 i 分钟有任务开始时：<code class="bg-gray-200 px-1 rounded">dp[i] = max(dp[i + t])</code>，其中 t 是所有在 i 分钟开始的任务的持续时间</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-medium mb-2">算法思路</h3>
+                            <ol class="list-decimal pl-5 space-y-1">
+                                <li>从最后一分钟向前递推计算每个时间点的最大空闲时间</li>
+                                <li>如果当前时间点没有任务，则空闲时间加1</li>
+                                <li>如果有任务，则选择所有可能任务中结束后空闲时间最大的那个</li>
+                                <li>最终 dp[1] 即为从第1分钟开始的最大空闲时间</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="mt-12 py-6 border-t border-gray-200 text-center text-gray-500 text-sm">
+        <p>尼克工作调度问题可视化工具 &copy; 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素
+            const totalMinutesInput = document.getElementById('totalMinutes');
+            const taskCountInput = document.getElementById('taskCount');
+            const taskInputsContainer = document.getElementById('taskInputs');
+            const addTaskBtn = document.getElementById('addTask');
+            const runAlgorithmBtn = document.getElementById('runAlgorithm');
+            const resultSummary = document.getElementById('resultSummary');
+            const initialMessage = document.getElementById('initialMessage');
+            const totalIdleTimeEl = document.getElementById('totalIdleTime');
+            const totalWorkTimeEl = document.getElementById('totalWorkTime');
+            const selectedTasksCountEl = document.getElementById('selectedTasksCount');
+            const selectedTasksList = document.getElementById('selectedTasksList');
+            const timeline = document.getElementById('timeline');
+            const timeLabels = document.getElementById('timeLabels');
+            const tasksContainer = document.getElementById('tasksContainer');
+            const currentTimeIndicator = document.getElementById('currentTimeIndicator');
+            const currentTimeValue = document.getElementById('currentTimeValue');
+            const dpTableBody = document.getElementById('dpTableBody');
+            const playAnimationBtn = document.getElementById('playAnimation');
+            const prevStepBtn = document.getElementById('prevStep');
+            const nextStepBtn = document.getElementById('nextStep');
+            const presetBtns = document.querySelectorAll('.preset-btn');
+            
+            // 状态变量
+            let tasks = [];
+            let dp = [];
+            let selectedTasks = [];
+            let currentStep = 0;
+            let animationInterval = null;
+            let isAnimating = false;
+            
+            // 初始化任务输入
+            updateTaskInputs();
+            
+            // 事件监听器
+            addTaskBtn.addEventListener('click', addTaskInput);
+            runAlgorithmBtn.addEventListener('click', runAlgorithm);
+            playAnimationBtn.addEventListener('click', toggleAnimation);
+            prevStepBtn.addEventListener('click', goToPrevStep);
+            nextStepBtn.addEventListener('click', goToNextStep);
+            
+            // 预设案例
+            presetBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const preset = this.dataset.preset;
+                    loadPreset(preset);
+                });
+            });
+            
+            // 加载预设案例
+            function loadPreset(preset) {
+                switch(preset) {
+                    case 'small':
+                        totalMinutesInput.value = 10;
+                        taskCountInput.value = 3;
+                        setTaskInputs([
+                            { start: 1, duration: 3 },
+                            { start: 4, duration: 2 },
+                            { start: 7, duration: 3 }
+                        ]);
+                        break;
+                    case 'medium':
+                        totalMinutesInput.value = 15;
+                        taskCountInput.value = 6;
+                        setTaskInputs([
+                            { start: 1, duration: 2 },
+                            { start: 1, duration: 6 },
+                            { start: 4, duration: 11 },
+                            { start: 8, duration: 5 },
+                            { start: 8, duration: 1 },
+                            { start: 11, duration: 5 }
+                        ]);
+                        break;
+                    case 'large':
+                        totalMinutesInput.value = 20;
+                        taskCountInput.value = 8;
+                        setTaskInputs([
+                            { start: 1, duration: 5 },
+                            { start: 3, duration: 7 },
+                            { start: 6, duration: 4 },
+                            { start: 8, duration: 3 },
+                            { start: 10, duration: 6 },
+                            { start: 12, duration: 3 },
+                            { start: 15, duration: 4 },
+                            { start: 17, duration: 3 }
+                        ]);
+                        break;
+                    case 'custom':
+                        // 清空所有任务输入，只保留一个空的
+                        taskInputsContainer.innerHTML = `
+                            <div class="font-medium text-gray-700 mb-2">任务详情</div>
+                            <div class="task-input bg-gray-50 p-3 rounded-md flex items-center">
+                                <div class="w-1/2 pr-2">
+                                    <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                                    <input type="number" value="1" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                                </div>
+                                <div class="w-1/2 pl-2">
+                                    <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                                    <input type="number" value="2" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                                </div>
+                                <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+                        updateTaskInputs();
+                        break;
+                }
+            }
+            
+            // 设置任务输入值
+            function setTaskInputs(taskData) {
+                taskInputsContainer.innerHTML = '<div class="font-medium text-gray-700 mb-2">任务详情</div>';
+                
+                taskData.forEach(task => {
+                    const taskInput = document.createElement('div');
+                    taskInput.className = 'task-input bg-gray-50 p-3 rounded-md flex items-center';
+                    taskInput.innerHTML = `
+                        <div class="w-1/2 pr-2">
+                            <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                            <input type="number" value="${task.start}" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                        </div>
+                        <div class="w-1/2 pl-2">
+                            <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                            <input type="number" value="${task.duration}" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                        </div>
+                        <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    `;
+                    taskInputsContainer.appendChild(taskInput);
+                });
+                
+                updateTaskInputs();
+            }
+            
+            // 更新任务输入
+            function updateTaskInputs() {
+                // 添加任务输入事件
+                const removeButtons = document.querySelectorAll('.remove-task');
+                removeButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (document.querySelectorAll('.task-input').length > 1) {
+                            this.parentElement.remove();
+                        } else {
+                            // 如果只剩一个，清空它
+                            const inputs = this.parentElement.querySelectorAll('input');
+                            inputs.forEach(input => input.value = '');
+                        }
+                    });
+                });
+                
+                // 自动同步任务数量
+                const taskInputs = document.querySelectorAll('.task-input');
+                taskCountInput.value = taskInputs.length;
+                
+                // 监听任务数量变化
+                taskCountInput.addEventListener('change', function() {
+                    const currentCount = taskInputs.length;
+                    const newCount = parseInt(this.value);
+                    
+                    if (newCount > currentCount) {
+                        // 添加任务输入
+                        for (let i = currentCount; i < newCount; i++) {
+                            addTaskInput();
+                        }
+                    } else if (newCount < currentCount) {
+                        // 移除任务输入
+                        const toRemove = currentCount - newCount;
+                        const taskInputs = document.querySelectorAll('.task-input');
+                        for (let i = 0; i < toRemove && taskInputs.length > 1; i++) {
+                            taskInputs[taskInputs.length - 1].remove();
+                        }
+                    }
+                });
+            }
+            
+            // 添加新的任务输入
+            function addTaskInput() {
+                const taskInput = document.createElement('div');
+                taskInput.className = 'task-input bg-gray-50 p-3 rounded-md flex items-center';
+                taskInput.innerHTML = `
+                    <div class="w-1/2 pr-2">
+                        <label class="block text-xs text-gray-500">开始时间 (p)</label>
+                        <input type="number" value="1" min="1" max="100" class="task-start w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                    </div>
+                    <div class="w-1/2 pl-2">
+                        <label class="block text-xs text-gray-500">持续时间 (t)</label>
+                        <input type="number" value="2" min="1" max="100" class="task-duration w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                    </div>
+                    <button class="remove-task ml-2 text-red-500 hover:text-red-700 transition-colors">
+                        <i class="fa fa-times"></i>
+                    </button>
+                `;
+                taskInputsContainer.appendChild(taskInput);
+                
+                // 添加删除事件
+                taskInput.querySelector('.remove-task').addEventListener('click', function() {
+                    taskInput.remove();
+                });
+                
+                // 更新任务数量
+                taskCountInput.value = document.querySelectorAll('.task-input').length;
+            }
+            
+            // 运行算法
+            function runAlgorithm() {
+                // 停止任何正在运行的动画
+                if (isAnimating) {
+                    toggleAnimation();
+                }
+                
+                // 获取输入
+                const n = parseInt(totalMinutesInput.value);
+                const taskInputs = document.querySelectorAll('.task-input');
+                
+                // 收集任务数据
+                tasks = [];
+                taskInputs.forEach((taskInput, index) => {
+                    const start = parseInt(taskInput.querySelector('.task-start').value);
+                    const duration = parseInt(taskInput.querySelector('.task-duration').value);
+                    
+                    if (!isNaN(start) && !isNaN(duration) && start >= 1 && start <= n && duration >= 1 && start + duration - 1 <= n) {
+                        tasks.push({
+                            id: index + 1,
+                            start,
+                            duration,
+                            end: start + duration - 1
+                        });
+                    }
+                });
+                
+                // 按开始时间排序
+                tasks.sort((a, b) => a.start - b.start);
+                
+                // 初始化DP数组
+                dp = new Array(n + 2).fill(0);
+                selectedTasks = new Array(n + 2).fill(null);
+                
+                // 构建任务映射
+                const tasksByMinute = new Array(n + 2).fill().map(() => []);
+                tasks.forEach(task => {
+                    tasksByMinute[task.start].push(task);
+                });
+                
+                // 动态规划计算
+                for (let i = n; i >= 1; i--) {
+                    if (tasksByMinute[i].length === 0) {
+                        // 没有任务，空闲时间+1
+                        dp[i] = dp[i + 1] + 1;
+                        selectedTasks[i] = null;
+                    } else {
+                        // 有任务，选择最优任务
+                        let maxDp = 0;
+                        let bestTask = null;
+                        
+                        tasksByMinute[i].forEach(task => {
+                            const end = i + task.duration;
+                            if (dp[end] > maxDp) {
+                                maxDp = dp[end];
+                                bestTask = task;
+                            }
+                        });
+                        
+                        dp[i] = maxDp;
+                        selectedTasks[i] = bestTask;
+                    }
+                }
+                
+                // 收集选择的任务
+                const chosenTasks = [];
+                let current = 1;
+                while (current <= n) {
+                    const task = selectedTasks[current];
+                    if (task) {
+                        chosenTasks.push(task);
+                        current = task.end + 1;
+                    } else {
+                        current++;
+                    }
+                }
+                
+                // 计算总工作时间
+                const totalWorkTime = chosenTasks.reduce((sum, task) => sum + task.duration, 0);
+                
+                // 更新UI
+                updateResults(n, dp[1], totalWorkTime, chosenTasks);
+                updateTimeline(n, tasks, chosenTasks);
+                updateDPTable(n, tasksByMinute, dp, selectedTasks);
+                
+                // 显示结果，隐藏初始消息
+                resultSummary.classList.remove('hidden');
+                initialMessage.classList.add('hidden');
+                
+                // 重置步骤
+                currentStep = 0;
+                updateCurrentStep();
+            }
+            
+            // 更新结果摘要
+            function updateResults(n, totalIdleTime, totalWorkTime, chosenTasks) {
+                totalIdleTimeEl.textContent = totalIdleTime;
+                totalWorkTimeEl.textContent = totalWorkTime;
+                selectedTasksCountEl.textContent = chosenTasks.length;
+                
+                // 更新选择的任务列表
+                selectedTasksList.innerHTML = '';
+                if (chosenTasks.length === 0) {
+                    selectedTasksList.innerHTML = '<div class="text-gray-500 italic">没有选择任何任务</div>';
+                } else {
+                    chosenTasks.forEach(task => {
+                        const taskEl = document.createElement('div');
+                        taskEl.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-md';
+                        taskEl.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-secondary mr-2"></div>
+                                <span>任务 #${task.id}</span>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                ${task.start} → ${task.end} (${task.duration}分钟)
+                            </div>
+                        `;
+                        selectedTasksList.appendChild(taskEl);
+                    });
+                }
+            }
+            
+            // 更新时间线可视化
+            function updateTimeline(n, allTasks, chosenTasks) {
+                // 清空时间线
+                timeline.innerHTML = '';
+                timeLabels.innerHTML = '';
+                tasksContainer.innerHTML = '';
+                
+                // 创建时间点
+                for (let i = 1; i <= n; i++) {
+                    const point = document.createElement('div');
+                    point.className = 'timeline-point';
+                    point.dataset.time = i;
+                    point.style.left = `${((i - 1) / (n - 1)) * 100}%`;
+                    
+                    // 高亮整点
+                    if (i % 5 === 0 || i === 1 || i === n) {
+                        point.classList.add('bg-primary');
+                        
+                        // 添加时间标签
+                        const label = document.createElement('div');
+                        label.className = 'text-center';
+                        label.style.width = `${100 / n}%`;
+                        label.textContent = i;
+                        timeLabels.appendChild(label);
+                    } else {
+                        point.classList.add('bg-gray-400');
+                    }
+                    
+                    point.addEventListener('click', function() {
+                        if (!isAnimating) {
+                            currentStep = parseInt(this.dataset.time);
+                            updateCurrentStep();
+                        }
+                    });
+                    
+                    timeline.appendChild(point);
+                }
+                
+                // 创建任务条
+                allTasks.forEach(task => {
+                    const isChosen = chosenTasks.some(t => t.id === task.id);
+                    const taskBar = document.createElement('div');
+                    taskBar.className = `task-bar absolute h-8 flex items-center ${isChosen ? 'bg-secondary text-white' : 'bg-gray-200 text-gray-700'}`;
+                    taskBar.style.left = `${((task.start - 1) / (n - 1)) * 100}%`;
+                    taskBar.style.width = `${(task.duration / (n - 1)) * 100}%`;
+                    taskBar.innerHTML = `
+                        <div class="px-2 text-xs font-medium">任务 #${task.id}</div>
+                    `;
+                    taskBar.dataset.id = task.id;
+                    
+                    tasksContainer.appendChild(taskBar);
+                });
+            }
+            
+            // 更新DP表
+            function updateDPTable(n, tasksByMinute, dp, selectedTasks) {
+                dpTableBody.innerHTML = '';
+                
+                for (let i = 1; i <= n; i++) {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition-colors';
+                    row.dataset.time = i;
+                    
+                    // 时间
+                    const timeCell = document.createElement('td');
+                    timeCell.className = 'px-2 py-2 font-medium';
+                    timeCell.textContent = i;
+                    
+                    // 任务
+                    const tasksCell = document.createElement('td');
+                    tasksCell.className = 'px-2 py-2';
+                    
+                    if (tasksByMinute[i].length === 0) {
+                        tasksCell.textContent = '无';
+                    } else {
+                        const tasksList = document.createElement('div');
+                        tasksList.className = 'space-y-1';
+                        
+                        tasksByMinute[i].forEach(task => {
+                            const taskEl = document.createElement('div');
+                            taskEl.className = `flex items-center ${selectedTasks[i] && selectedTasks[i].id === task.id ? 'bg-secondary/20 rounded px-1' : ''}`;
+                            taskEl.innerHTML = `
+                                <span class="text-xs font-medium">#${task.id}</span>
+                                <span class="text-xs ml-2">${task.start}→${task.end} (${task.duration}分钟)</span>
+                            `;
+                            tasksList.appendChild(taskEl);
+                        });
+                        
+                        tasksCell.appendChild(tasksList);
+                    }
+                    
+                    // 状态转移
+                    const transitionCell = document.createElement('td');
+                    transitionCell.className = 'px-2 py-2';
+                    
+                    if (tasksByMinute[i].length === 0) {
+                        transitionCell.innerHTML = `
+                            <div class="text-xs">dp[${i}] = dp[${i+1}] + 1</div>
+                            <div class="text-xs text-gray-500">空闲1分钟</div>
+                        `;
+                    } else {
+                        const transitionsList = document.createElement('div');
+                        transitionsList.className = 'space-y-1 text-xs';
+                        
+                        tasksByMinute[i].forEach(task => {
+                            const end = task.end + 1;
+                            const isSelected = selectedTasks[i] && selectedTasks[i].id === task.id;
+                            
+                            const transitionEl = document.createElement('div');
+                            transitionEl.className = isSelected ? 'font-medium' : 'text-gray-600';
+                            transitionEl.innerHTML = `
+                                dp[${i}] = dp[${task.start} + ${task.duration}] = dp[${end}] = ${dp[end]}
+                            `;
+                            
+                            transitionsList.appendChild(transitionEl);
+                        });
+                        
+                        transitionCell.appendChild(transitionsList);
+                    }
+                    
+                    // dp值
+                    const dpCell = document.createElement('td');
+                    dpCell.className = 'px-2 py-2 font-medium';
+                    dpCell.textContent = dp[i];
+                    
+                    // 决策
+                    const decisionCell = document.createElement('td');
+                    decisionCell.className = 'px-2 py-2';
+                    
+                    if (tasksByMinute[i].length === 0) {
+                        decisionCell.textContent = '休息';
+                    } else {
+                        if (selectedTasks[i]) {
+                            decisionCell.innerHTML = `
+                                <div class="text-xs font-medium">选择任务 #${selectedTasks[i].id}</div>
+                                <div class="text-xs text-gray-500">从${selectedTasks[i].start}到${selectedTasks[i].end}</div>
+                            `;
+                        } else {
+                            decisionCell.textContent = '无可行任务';
+                        }
+                    }
+                    
+                    // 添加点击事件
+                    row.addEventListener('click', function() {
+                        if (!isAnimating) {
+                            currentStep = parseInt(this.dataset.time);
+                            updateCurrentStep();
+                        }
+                    });
+                    
+                    // 添加到表格
+                    row.appendChild(timeCell);
+                    row.appendChild(tasksCell);
+                    row.appendChild(transitionCell);
+                    row.appendChild(dpCell);
+                    row.appendChild(decisionCell);
+                    dpTableBody.appendChild(row);
+                }
+            }
+            
+            // 更新当前步骤
+            function updateCurrentStep() {
+                // 重置所有状态
+                document.querySelectorAll('.timeline-point').forEach(point => {
+                    point.classList.remove('timeline-point-active');
+                });
+                
+                document.querySelectorAll('#dpTableBody tr').forEach(row => {
+                    row.classList.remove('dp-cell-active');
+                });
+                
+                // 高亮当前步骤
+                if (currentStep >= 1 && currentStep <= parseInt(totalMinutesInput.value)) {
+                    const point = document.querySelector(`.timeline-point[data-time="${currentStep}"]`);
+                    if (point) {
+                        point.classList.add('timeline-point-active');
+                    }
+                    
+                    const row = document.querySelector(`#dpTableBody tr[data-time="${currentStep}"]`);
+                    if (row) {
+                        row.classList.add('dp-cell-active');
+                    }
+                    
+                    // 更新时间指示器
+                    currentTimeIndicator.style.left = `${((currentStep - 1) / (parseInt(totalMinutesInput.value) - 1)) * 100}%`;
+                    currentTimeValue.textContent = currentStep;
+                    currentTimeIndicator.classList.remove('hidden');
+                } else {
+                    currentTimeIndicator.classList.add('hidden');
+                }
+            }
+            
+            // 播放/暂停动画
+            function toggleAnimation() {
+                if (isAnimating) {
+                    // 暂停动画
+                    clearInterval(animationInterval);
+                    playAnimationBtn.innerHTML = '<i class="fa fa-play mr-1"></i> 播放动画';
+                } else {
+                    // 播放动画
+                    const n = parseInt(totalMinutesInput.value);
+                    animationInterval = setInterval(() => {
+                        currentStep++;
+                        if (currentStep > n) {
+                            currentStep = 1;
+                        }
+                        updateCurrentStep();
+                    }, 1000);
+                    
+                    playAnimationBtn.innerHTML = '<i class="fa fa-pause mr-1"></i> 暂停动画';
+                }
+                
+                isAnimating = !isAnimating;
+            }
+            
+            // 上一步
+            function goToPrevStep() {
+                const n = parseInt(totalMinutesInput.value);
+                currentStep = Math.max(1, currentStep - 1);
+                updateCurrentStep();
+            }
+            
+            // 下一步
+            function goToNextStep() {
+                const n = parseInt(totalMinutesInput.value);
+                currentStep = Math.min(n, currentStep + 1);
+                updateCurrentStep();
+            }
+            
+            // 加载中等预设案例作为初始值
+            loadPreset('medium');
+        });
+    </script>
+</body>
+</html>

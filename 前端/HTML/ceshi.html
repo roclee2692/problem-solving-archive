@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh - CN">
+
+<head>
+    <meta charset="UTF - 8">
+    <meta name="viewport" content="width=device-width, initial - scale=1.0">
+    <title>小球在六边形内的动画</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 六边形相关参数
+        const hexagonRadius = 200;
+        const hexagonCenterX = canvas.width / 2;
+        const hexagonCenterY = canvas.height / 2;
+        const hexagonVertices = 6;
+        const angleIncrement = (2 * Math.PI) / hexagonVertices;
+
+        // 小球相关参数
+        let ballX = hexagonCenterX;
+        let ballY = hexagonCenterY - hexagonRadius;
+        let ballRadius = 20;
+        let ballSpeedX = 0;
+        let ballSpeedY = 0;
+        const gravity = 0.5;
+        const friction = 0.95;
+
+        // 六边形旋转角度
+        let rotationAngle = 0;
+
+        function drawHexagon() {
+            ctx.beginPath();
+            for (let i = 0; i < hexagonVertices; i++) {
+                const angle = rotationAngle + i * angleIncrement;
+                const x = hexagonCenterX + hexagonRadius * Math.cos(angle);
+                const y = hexagonCenterY + hexagonRadius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+            ctx.fillStyle ='red';
+            ctx.fill();
+        }
+
+        function updateBall() {
+            // 应用重力
+            ballSpeedY += gravity;
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // 检查小球与六边形边界的碰撞
+            for (let i = 0; i < hexagonVertices; i++) {
+                const angle = rotationAngle + i * angleIncrement;
+                const nextAngle = rotationAngle + (i + 1) % hexagonVertices * angleIncrement;
+                const x1 = hexagonCenterX + hexagonRadius * Math.cos(angle);
+                const y1 = hexagonCenterY + hexagonRadius * Math.sin(angle);
+                const x2 = hexagonCenterX + hexagonRadius * Math.cos(nextAngle);
+                const y2 = hexagonCenterY + hexagonRadius * Math.sin(nextAngle);
+
+                // 使用点到直线距离公式检查碰撞
+                const numerator = Math.abs((x2 - x1) * (y1 - ballY) - (x1 - ballX) * (y2 - y1));
+                const denominator = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+                const distance = numerator / denominator;
+
+                if (distance <= ballRadius) {
+                    // 碰撞处理，简单反弹并应用摩擦力
+                    ballSpeedX *= -friction;
+                    ballSpeedY *= -friction;
+                }
+            }
+
+            // 限制小球在画布内
+            if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
+                ballSpeedX *= -friction;
+            }
+            if (ballY - ballRadius < 0 || ballY + ballRadius > canvas.height) {
+                ballSpeedY *= -friction;
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawHexagon();
+            updateBall();
+            drawBall();
+            rotationAngle += 0.01;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>

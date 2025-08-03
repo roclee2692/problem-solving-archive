@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- 设置字符集为UTF-8 -->
+    <meta charset="UTF-8" />
+    <!-- 设置视口宽度为设备宽度，初始化缩放比例为1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 引入Mapbox样式 -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <!-- 引入Mapbox GL JS脚本 -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <title>Document</title>
+    <style>
+      /* 全局样式设置，移除所有元素的外边距和内边距 */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 设置地图容器 */
+      #map {
+        width: 100%; /* 宽度为100% */
+        height: 100vh; /* 高度为100视口高度 */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 创建地图容器 -->
+    <div id="map"></div>
+
+    <script>
+      // 设置Mapbox访问令牌
+      mapboxgl.accessToken =
+      `pk.eyJ1IjoiemhvbmdkaXNodW1hIiwiYSI6ImNsNXJoYXR5eTI2bGgzZW53d2didWF1c3AifQ.6vOplM2NQc_xnJW3aA5ZBA`;
+
+      // 创建一个Mapbox地图实例
+      const map = new mapboxgl.Map({
+        container: 'map', // 地图容器ID
+        style: 'mapbox://styles/mapbox/dark-v11', // 地图样式
+        center: [114.3, 38.5], // 地图初始中心位置
+        zoom: 12, // 初始缩放级别
+      });
+
+      // 请求并渲染道路状态数据
+      fetch('http://39.103.151.139:8000/gis/road_state')
+        .then((res) => res.json()) // 解析JSON数据
+        .then((data) => {
+          map.addSource('lineSource', {
+            type: 'geojson', // 数据类型为GeoJSON
+            data: data, // 将请求到的数据添加到数据源
+          });
+
+          // 为道路状态数据添加一个线条层
+          map.addLayer({
+            id: 'lineLayer', // 图层ID
+            type: 'line', // 图层类型为线条
+            source: 'lineSource', // 数据来源
+            paint: {
+              'line-width': 5, // 设置线宽为5
+              'line-color': [
+                'step',
+                ['get', 'flow'], // 根据flow值来设置颜色
+                'green', // 流量小于1200时颜色为绿色
+                1200,
+                'yellow', // 流量大于1200时颜色为黄色
+                1500,
+                'red', // 流量大于1500时颜色为红色
+              ],
+            },
+          });
+        });
+
+      // 请求并渲染区域数据
+      fetch('https://geo.dataviv.aliyun.com/areas_v3/bound/420000_full.json')
+        .then((res) => res.json()) // 解析JSON数据
+        .then((data) => {
+          map.addSource('fillSource', {
+            type: 'geojson', // 数据类型为GeoJSON
+            data: data, // 将请求到的数据添加到数据源
+          });
+
+          // 为区域数据添加一个填充层
+          map.addLayer({
+            id: 'fillLayer', // 图层ID
+            type: 'fill', // 图层类型为填充
+            source: 'fillSource', // 数据来源
+            paint: {
+              'fill-color': 'red', // 填充颜色为红色
+              'fill-opacity': 0.5, // 填充透明度为50%
+              'fill-outline-color': 'yellow', // 填充边界颜色为黄色
+            },
+          });
+
+          // 为区域添加轮廓线图层
+          map.addLayer({
+            id: 'outlineLayer', // 图层ID
+            type: 'line', // 图层类型为线条
+            source: 'fillSource', // 数据来源
+            paint: {
+              'line-width': 5, // 线宽为5
+              'line-color': 'yellow', // 线颜色为黄色
+            },
+          });
+        });
+    </script>
+  </body>
+</html>
