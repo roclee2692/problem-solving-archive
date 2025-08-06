@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
-#define int ll
 using pll=pair<ll,ll>;
 using de=double;
 using ld=long double;

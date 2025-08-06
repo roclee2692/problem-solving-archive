@@ -55,7 +55,9 @@ int main(){
         cin >> E[i].u >> E[i].v >> E[i].w;
     }
       // 1. 预排序
-      sort(E.begin()+1,E.end(),[](auto &a,auto &b){return a.w<b.w;});// 只排序 1…m
+      sort(E.begin()+1,E.end(),[](const Edge &a,const Edge &b){return a.w<b.w;});// 只排序 1…m
+      //在竞赛环境下把 lambda 参数写成 const Edge& 
+      //C++11 并不支持在 lambda 参数列表里用 auto 来做通用类型推导，只有从 C++14 才开始允许这种 “generic lambda”。
        // 2. 第一次 Kruskal，求 MST
        ll sum=kruskal(-1);
         // 3. 对每条 MST 边尝试跳过

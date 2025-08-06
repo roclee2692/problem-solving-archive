@@ -111,7 +111,7 @@ ios::sync_with_stdio(0);cin.tie(0);
     for(int i=1;i<=m;i++) {
         cin>>E[i].u>>E[i].v>>E[i].w;
     }
-    sort(E.begin()+1,E.end(),[](auto &a,auto &b){return a.w<b.w;});
+    sort(E.begin()+1,E.end(),[](const edge &a,const edge &b){return a.w<b.w;});
     ll sum=kruskal(-1);
 for(int i = 0; i <= LOGN; ++i){
     up[0][i]  = 0;     // 祖先仍是 0
