@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LCA（二叉提升）可视化 | 纯 HTML + JS</title>
+  <style>
+    :root{--bg:#ffffff;--fg:#0f172a;--muted:#64748b;--primary:#0ea5e9;--dark:#111827;--panel:#f8fafc;--line:#e5e7eb;--warn:#fef9c3;--ok:#dcfce7}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+    .wrap{padding:20px 24px;max-width:1200px;margin:0 auto;}
+    h1{font-size:30px;margin:0 0 10px 0}
+    .desc{color:var(--muted);font-size:18px;margin-bottom:16px}
+    .grid{display:grid;gap:16px}
+    .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+    .row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+    label{font-weight:600}
+    input[type="number"],textarea{font-size:18px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+    textarea{width:100%;height:180px;}
+    .btn{border:1px solid var(--line);padding:8px 12px;border-radius:12px;background:#fff;font-size:16px;cursor:pointer}
+    .btn.primary{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .title{font-weight:700;margin-bottom:10px}
+    .muted{color:var(--muted);font-size:14px}
+
+    /* SVG 树图 */
+    .svgbox{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .node circle{fill:var(--primary);opacity:.9}
+    .node.root circle{fill:var(--dark)}
+    .node text{fill:#fff;font-weight:700;font-size:16px;dominant-baseline:middle;text-anchor:middle}
+    .edge{stroke:#ddd;stroke-width:3}
+    .node.highlight circle{stroke:#f59e0b;stroke-width:5}
+
+    /* 步骤列表 */
+    .steps{height:200px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
+    .step{padding:6px 8px;border-radius:8px;margin-bottom:6px;font-size:16px}
+    .step.active{background:var(--warn);font-weight:700}
+
+    /* 表格 */
+    table{border-collapse:collapse;font-size:16px}
+    th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+    thead{background:#f1f5f9}
+    .tablebox{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .cell-hl{background:var(--warn);font-weight:700}
+    .cell-hl2{background:var(--ok);font-weight:700}
+
+    .section-title{font-weight:700;margin:14px 0 10px 0}
+    .two-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .controls{display:flex;gap:6px;flex-wrap:wrap}
+    .zoom{display:flex;align-items:center;gap:10px}
+    .note{color:var(--muted);font-size:15px;margin-top:6px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LCA（二叉提升）可视化</h1>
+  <div class="desc">纯 HTML + 原生 JavaScript。输入树与根节点后，点击「构建」。可逐步回放 <b>DFS 建表</b> 与 <b>LCA 查询跳跃</b>，同时高亮 <b>depth / up / maxE / dist</b> 对应单元格。建议规模 ≤ 50。</div>
+
+  <div class="grid g3">
+    <div class="panel">
+      <div class="title">基础参数</div>
+      <div class="row">
+        <label for="n">n：</label>
+        <input id="n" type="number" value="7" min="1" style="width:90px">
+        <label for="root">root：</label>
+        <input id="root" type="number" value="1" min="1" style="width:90px">
+      </div>
+      <div class="row">
+        <label>权重：</label>
+        <input id="weighted" type="checkbox">
+        <span class="muted">勾选后边的第三列作为权重，展示真实的 maxE / dist。</span>
+      </div>
+      <div class="row controls">
+        <button id="buildBtn" class="btn primary">构建 / 重建</button>
+        <button id="s1" class="btn">示例①（无权）</button>
+        <button id="s2" class="btn">示例②（有权）</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="title">边（每行：u v [w]）</div>
+      <textarea id="edges"></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="title">查询（每行：a b）</div>
+      <textarea id="queries"></textarea>
+      <div class="row">
+        <input id="qa" type="number" value="4" style="width:90px"> ,
+        <input id="qb" type="number" value="6" style="width:90px">
+        <button id="runQ" class="btn primary">单次查询</button>
+        <button id="runQ1" class="btn">用第一行查询</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="row" style="justify-content:space-between">
+      <div class="title">树形结构</div>
+      <div class="zoom">
+        <span class="muted">缩放</span>
+        <input id="zoom" type="range" min="0.5" max="2" step="0.05" value="1">
+        <span id="zoomv" class="muted">1.00×</span>
+      </div>
+    </div>
+    <div id="svgbox" class="svgbox">
+      <svg id="svg" width="1000" height="400"></svg>
+    </div>
+    <div class="note">提示：布局为简单的递归排版，适合教学小数据；规模大时仅看表格与步骤。</div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="title">构建步骤（DFS + 倍增建表）</div>
+        <div class="controls">
+          <button id="bFirst" class="btn">⏮️</button>
+          <button id="bPrev" class="btn">◀️</button>
+          <button id="bPlay" class="btn primary">▶️ 自动播放</button>
+          <button id="bNext" class="btn">▶️</button>
+          <button id="bLast" class="btn">⏭️</button>
+        </div>
+      </div>
+      <div id="buildSteps" class="steps"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="title">查询步骤（LCA 跳跃过程）</div>
+        <div class="controls">
+          <button id="qFirst" class="btn">⏮️</button>
+          <button id="qPrev" class="btn">◀️</button>
+          <button id="qPlay" class="btn primary">▶️ 自动播放</button>
+          <button id="qNext" class="btn">▶️</button>
+          <button id="qLast" class="btn">⏭️</button>
+        </div>
+      </div>
+      <div id="querySteps" class="steps"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="title">DP 表格</div>
+    <div class="two-cols">
+      <div>
+        <div class="section-title">depth</div>
+        <div class="tablebox"><table id="depthTbl"><thead><tr><th>u</th><th>depth[u]</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div>
+        <div class="section-title">dist</div>
+        <div class="tablebox"><table id="distTbl"><thead><tr><th>u</th><th>dist[u]</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px">up[u][i]</div>
+    <div class="tablebox" id="upWrap"></div>
+
+    <div class="section-title" style="margin-top:16px">maxE[u][i]</div>
+    <div class="tablebox" id="maxEWrap"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // -------------------- DOM --------------------
+  const elN = document.getElementById('n');
+  const elRoot = document.getElementById('root');
+  const elWeighted = document.getElementById('weighted');
+  const elEdges = document.getElementById('edges');
+  const elQueries = document.getElementById('queries');
+  const elBuild = document.getElementById('buildBtn');
+  const elS1 = document.getElementById('s1');
+  const elS2 = document.getElementById('s2');
+  const elQA = document.getElementById('qa');
+  const elQB = document.getElementById('qb');
+  const elRunQ = document.getElementById('runQ');
+  const elRunQ1 = document.getElementById('runQ1');
+
+  const svg = document.getElementById('svg');
+  const zoom = document.getElementById('zoom');
+  const zoomv = document.getElementById('zoomv');
+
+  const buildStepsBox = document.getElementById('buildSteps');
+  const queryStepsBox = document.getElementById('querySteps');
+
+  const bFirst = document.getElementById('bFirst');
+  const bPrev  = document.getElementById('bPrev');
+  const bPlay  = document.getElementById('bPlay');
+  const bNext  = document.getElementById('bNext');
+  const bLast  = document.getElementById('bLast');
+  const qFirst = document.getElementById('qFirst');
+  const qPrev  = document.getElementById('qPrev');
+  const qPlay  = document.getElementById('qPlay');
+  const qNext  = document.getElementById('qNext');
+  const qLast  = document.getElementById('qLast');
+
+  const depthTbl = document.getElementById('depthTbl');
+  const distTbl  = document.getElementById('distTbl');
+  const upWrap   = document.getElementById('upWrap');
+  const maxEWrap = document.getElementById('maxEWrap');
+
+  // -------------------- 状态 --------------------
+  let N=7, R=1, WEIGHTED=false;
+  let ADJ = [];
+  let LOG = 0;
+  let depth=[], dist=[], up=[], maxE=[];
+  let built=false;
+
+  let buildSteps=[]; let bIdx=-1; let bTimer=null; let bAutoplay=false;
+  let querySteps=[]; let qIdx=-1; let qTimer=null; let qAutoplay=false;
+
+  // -------------------- 工具 --------------------
+  function parseEdges(txt){
+    const res=[]; (txt||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
+      const a=line.split(/\s+/).map(Number).filter(v=>!Number.isNaN(v));
+      if(a.length>=2){const [u,v]=a; const w=a.length>=3?a[2]:1; res.push({u,v,w});}
+    }); return res;
+  }
+  function parseQueries(txt){
+    const res=[]; (txt||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
+      const a=line.split(/\s+/).map(Number); if(a.length>=2) res.push({a:a[0], b:a[1]});
+    }); return res;
+  }
+  function h(tag, attrs={}, ...children){
+    const e=document.createElement(tag);
+    for(const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k==='html') e.innerHTML=attrs[k]; else e.setAttribute(k, attrs[k]); }
+    for(const c of children){ if(typeof c==='string') e.appendChild(document.createTextNode(c)); else if(c) e.appendChild(c); }
+    return e;
+  }
+
+  // -------------------- 构建：DFS + 倍增建表（记录步骤） --------------------
+  function buildAll(){
+    N = +elN.value; R = +elRoot.value; WEIGHTED = !!elWeighted.checked;
+    if(!(N>=1 && N<=200)){ alert('演示建议 1 ≤ n ≤ 200'); return; }
+    const edges = parseEdges(elEdges.value);
+
+    LOG = Math.ceil(Math.log2(Math.max(1,N))) + 1;
+    ADJ = Array.from({length:N+1},()=>[]);
+    for(const {u,v,w} of edges){ if(1<=u&&u<=N && 1<=v&&v<=N && u!==v){ ADJ[u].push({to:v,w}); ADJ[v].push({to:u,w}); } }
+
+    depth = Array(N+1).fill(0);
+    dist  = Array(N+1).fill(0);
+    up    = Array.from({length:N+1},()=>Array(LOG+1).fill(0));
+    maxE  = Array.from({length:N+1},()=>Array(LOG+1).fill(0));
+
+    buildSteps=[]; bIdx=-1; stopBTimer(); bAutoplay=false; bPlay.textContent='▶️ 自动播放';
+    querySteps=[]; qIdx=-1; stopQTimer(); qAutoplay=false; qPlay.textContent='▶️ 自动播放'; renderQuerySteps();
+
+    const vis = Array(N+1).fill(false);
+    function dfs(u,p,wFromP){
+      vis[u]=true;
+      depth[u] = p===0 ? 0 : depth[p]+1;
+      buildSteps.push({kind:'depth', table:'depth', u, i:0, text:`设置 depth[${u}]=${depth[u]}（父 ${p}）`});
+
+      up[u][0]=p;
+      buildSteps.push({kind:'up0', table:'up', u, i:0, text:`up[${u}][0] = ${p}（父指针）`});
+
+      maxE[u][0]= p===0?0 : (WEIGHTED ? (wFromP??1) : 1);
+      buildSteps.push({kind:'maxE0', table:'maxE', u, i:0, text:`maxE[${u}][0] = ${maxE[u][0]}（与父边权）`});
+
+      for(let i=1;i<=LOG;i++){
+        const a=up[u][i-1];
+        up[u][i]= a? up[a][i-1] : 0;
+        buildSteps.push({kind:'up', table:'up', u, i, text:`up[${u}][${i}] = up[ up[${u}][${i-1}] ][${i-1}] = ${up[u][i]}`});
+        const left=maxE[u][i-1]; const right=a?maxE[a][i-1]:0;
+        maxE[u][i]=Math.max(left,right);
+        buildSteps.push({kind:'maxE', table:'maxE', u, i, text:`maxE[${u}][${i}] = max(${left}, ${right}) = ${maxE[u][i]}`});
+      }
+
+      for(const {to:v,w} of ADJ[u]){
+        if(v===p || vis[v]) continue;
+        dist[v] = dist[u] + (WEIGHTED? w : 1);
+        buildSteps.push({kind:'dist', table:'dist', u:v, i:0, text:`dist[${v}] = dist[${u}] + w(${u}-${v}) = ${dist[v]}`});
+        dfs(v,u,w);
+      }
+    }
+    dfs(R,0,0);
+
+    built=true;
+    renderAllTables();
+    layoutAndRenderTree();
+    renderBuildSteps();
+
+    // 进入第一步
+    if(buildSteps.length){ bIdx=0; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true); }
+  }
+
+  // -------------------- 查询 LCA（记录步骤） --------------------
+  function runQuery(a,b){
+    if(!built){ alert('请先构建'); return; }
+    if(!(1<=a&&a<=N && 1<=b&&b<=N)){ alert('点需在 1..n 内'); return; }
+    stopQTimer(); qAutoplay=false; qPlay.textContent='▶️ 自动播放';
+
+    const steps=[]; let x=a, y=b;
+    if(depth[x]<depth[y]){ steps.push({kind:'swap', text:`交换，使 x 更深：x=${y}, y=${x}`}); [x,y]=[y,x]; }
+
+    let diff=depth[x]-depth[y]; steps.push({kind:'info', text:`深度差 diff = ${diff}`});
+
+    for(let i=LOG;i>=0;i--){
+      if(((diff>>i)&1)===1){
+        const nx=up[x][i];
+        steps.push({kind:'lift', table:'up', u:x, i, text:`x 向上跳 2^${i}：up[${x}][${i}] = ${nx}`});
+        x=nx;
+      }
+    }
+
+    if(x===y){ steps.push({kind:'answer', text:`LCA = ${x}`}); querySteps=steps; qIdx=0; renderQuerySteps(); highlightByStep(querySteps[qIdx], false); return; }
+
+    for(let i=LOG;i>=0;i--){
+      if(up[x][i]!==up[y][i]){
+        steps.push({kind:'doubleLift', table:'up', u:x, i, text:`x,y 同跳 2^${i}：x→${up[x][i]}，y→${up[y][i]}`});
+        x=up[x][i]; y=up[y][i];
+      }
+    }
+
+    const ans=up[x][0]; steps.push({kind:'final', table:'up', u:x, i:0, text:`返回 up[x][0] = ${ans}`});
+
+    querySteps=steps; qIdx=0; renderQuerySteps(); highlightByStep(querySteps[qIdx], false);
+  }
+
+  // -------------------- UI：表格渲染 --------------------
+  function renderAllTables(){
+    // depth
+    const tb1=depthTbl.querySelector('tbody'); tb1.innerHTML='';
+    for(let u=1;u<=N;u++) tb1.appendChild(h('tr',{}, h('td',{}, String(u)), h('td',{id:`depth-${u}`}, String(depth[u]))));
+
+    // dist
+    const tb2=distTbl.querySelector('tbody'); tb2.innerHTML='';
+    for(let u=1;u<=N;u++) tb2.appendChild(h('tr',{}, h('td',{}, String(u)), h('td',{id:`dist-${u}`}, String(dist[u]))));
+
+    // up
+    const upTbl = h('table');
+    const thead = h('thead'); const hr=h('tr',{}); hr.appendChild(h('th',{}, 'u \\ i'));
+    for(let i=0;i<=LOG;i++) hr.appendChild(h('th',{}, String(i))); thead.appendChild(hr);
+    const tbody=h('tbody');
+    for(let u=1;u<=N;u++){
+      const tr=h('tr',{}); tr.appendChild(h('td',{}, String(u)));
+      for(let i=0;i<=LOG;i++) tr.appendChild(h('td',{id:`up-${u}-${i}`}, String(up[u][i])));
+      tbody.appendChild(tr);
+    }
+    upTbl.appendChild(thead); upTbl.appendChild(tbody); upWrap.innerHTML=''; upWrap.appendChild(upTbl);
+
+    // maxE
+    const meTbl = h('table');
+    const thead2 = h('thead'); const hr2=h('tr',{}); hr2.appendChild(h('th',{}, 'u \\ i'));
+    for(let i=0;i<=LOG;i++) hr2.appendChild(h('th',{}, String(i))); thead2.appendChild(hr2);
+    const tbody2=h('tbody');
+    for(let u=1;u<=N;u++){
+      const tr=h('tr',{}); tr.appendChild(h('td',{}, String(u)));
+      for(let i=0;i<=LOG;i++) tr.appendChild(h('td',{id:`maxE-${u}-${i}`}, String(maxE[u][i])));
+      tbody2.appendChild(tr);
+    }
+    meTbl.appendChild(thead2); meTbl.appendChild(tbody2); maxEWrap.innerHTML=''; maxEWrap.appendChild(meTbl);
+  }
+
+  // -------------------- UI：树布局 + 渲染 --------------------
+  function layoutAndRenderTree(){
+    // build rooted children
+    const parent=Array(N+1).fill(0); const children=Array.from({length:N+1},()=>[]);
+    const st=[R]; parent[R]=0; while(st.length){ const u=st.pop(); for(const {to:v} of ADJ[u]){ if(v===parent[u]) continue; parent[v]=u; children[u].push(v); st.push(v); } }
+
+    const levelGap=100, nodeGap=80; let cursorX=40; const pos=Array(N+1).fill(null); const links=[];
+    function place(u,depthLvl){ const ch=children[u]||[]; if(ch.length===0){ const x=cursorX; cursorX+=nodeGap; pos[u]={x,y:40+depthLvl*levelGap}; return pos[u]; } else { const arr=ch.map(v=>place(v,depthLvl+1)); const x=(arr[0].x+arr[arr.length-1].x)/2; pos[u]={x,y:40+depthLvl*levelGap}; for(const v of ch) links.push([u,v]); return pos[u]; } }
+    place(R,0);
+
+    // resize svg
+    const maxX = Math.max(...pos.filter(Boolean).map(p=>p.x));
+    const maxY = Math.max(...pos.filter(Boolean).map(p=>p.y));
+    svg.setAttribute('width', Math.max(800, maxX+80));
+    svg.setAttribute('height', Math.max(300, maxY+80));
+    svg.innerHTML='';
+
+    // edges
+    for(const [u,v] of links){ const a=pos[u], b=pos[v]; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',a.x); line.setAttribute('y1',a.y); line.setAttribute('x2',b.x); line.setAttribute('y2',b.y); line.setAttribute('class','edge'); svg.appendChild(line); }
+
+    // nodes
+    for(let u=1;u<=N;u++) if(pos[u]){
+      const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','node'+(u===R?' root':'')); g.setAttribute('data-id',u);
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',pos[u].x); c.setAttribute('cy',pos[u].y); c.setAttribute('r',22);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',pos[u].x); t.setAttribute('y',pos[u].y+1); t.textContent=String(u);
+      g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+    }
+
+    applyZoom();
+  }
+
+  function applyZoom(){ const s=parseFloat(zoom.value); zoomv.textContent=s.toFixed(2)+'×'; svg.style.transform=`scale(${s})`; svg.style.transformOrigin='top left'; }
+
+  // -------------------- UI：步骤渲染与高亮 --------------------
+  function renderBuildSteps(){
+    buildStepsBox.innerHTML='';
+    if(buildSteps.length===0){ buildStepsBox.appendChild(h('div',{class:'muted'},'（点击上方「构建 / 重建」后显示步骤）')); return; }
+    buildSteps.forEach((s,idx)=>{
+      const div=h('div',{class:'step'+(idx===bIdx?' active':'')}, `${idx+1}. ${s.text}`);
+      buildStepsBox.appendChild(div);
+    });
+  }
+  function renderQuerySteps(){
+    queryStepsBox.innerHTML='';
+    if(querySteps.length===0){ queryStepsBox.appendChild(h('div',{class:'muted'},'（执行查询后显示步骤）')); return; }
+    querySteps.forEach((s,idx)=>{
+      const div=h('div',{class:'step'+(idx===qIdx?' active':'')}, `${idx+1}. ${s.text}`);
+      queryStepsBox.appendChild(div);
+    });
+  }
+
+  function clearHighlights(){
+    // tables
+    document.querySelectorAll('.cell-hl,.cell-hl2').forEach(td=>td.classList.remove('cell-hl','cell-hl2'));
+    // nodes
+    svg.querySelectorAll('.node.highlight').forEach(n=>n.classList.remove('highlight'));
+  }
+
+  function highlightByStep(step, isBuild){
+    clearHighlights(); if(!step) return;
+    // table cell
+    if(step.table==='depth'){ const td=document.getElementById(`depth-${step.u}`); if(td) td.classList.add('cell-hl'); }
+    if(step.table==='dist'){ const td=document.getElementById(`dist-${step.u}`); if(td) td.classList.add('cell-hl'); }
+    if(step.table==='up'){ const td=document.getElementById(`up-${step.u}-${step.i}`); if(td) td.classList.add(isBuild?'cell-hl':'cell-hl2'); }
+    if(step.table==='maxE'){ const td=document.getElementById(`maxE-${step.u}-${step.i}`); if(td) td.classList.add('cell-hl'); }
+
+    // node
+    if(step.u){ const g=svg.querySelector(`.node[data-id="${step.u}"]`); if(g) g.classList.add('highlight'); }
+  }
+
+  // -------------------- 播放器控制 --------------------
+  function stopBTimer(){ if(bTimer){ clearInterval(bTimer); bTimer=null; } }
+  function stopQTimer(){ if(qTimer){ clearInterval(qTimer); qTimer=null; } }
+
+  bFirst.onclick=()=>{ if(!buildSteps.length) return; bIdx=0; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true); };
+  bPrev.onclick =()=>{ if(bIdx>0){ bIdx--; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true);} };
+  bNext.onclick =()=>{ if(bIdx<buildSteps.length-1){ bIdx++; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true);} };
+  bLast.onclick =()=>{ if(!buildSteps.length) return; bIdx=buildSteps.length-1; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true); };
+  bPlay.onclick =()=>{
+    if(!buildSteps.length) return;
+    bAutoplay=!bAutoplay; bPlay.textContent=bAutoplay?'⏸ 暂停':'▶️ 自动播放';
+    stopBTimer(); if(bAutoplay){ bTimer=setInterval(()=>{ if(bIdx<buildSteps.length-1){ bIdx++; renderBuildSteps(); highlightByStep(buildSteps[bIdx], true);} else { bAutoplay=false; bPlay.textContent='▶️ 自动播放'; stopBTimer(); } }, 600); }
+  };
+
+  qFirst.onclick=()=>{ if(!querySteps.length) return; qIdx=0; renderQuerySteps(); highlightByStep(querySteps[qIdx], false); };
+  qPrev.onclick =()=>{ if(qIdx>0){ qIdx--; renderQuerySteps(); highlightByStep(querySteps[qIdx], false);} };
+  qNext.onclick =()=>{ if(qIdx<querySteps.length-1){ qIdx++; renderQuerySteps(); highlightByStep(querySteps[qIdx], false);} };
+  qLast.onclick =()=>{ if(!querySteps.length) return; qIdx=querySteps.length-1; renderQuerySteps(); highlightByStep(querySteps[qIdx], false); };
+  qPlay.onclick =()=>{
+    if(!querySteps.length) return;
+    qAutoplay=!qAutoplay; qPlay.textContent=qAutoplay?'⏸ 暂停':'▶️ 自动播放';
+    stopQTimer(); if(qAutoplay){ qTimer=setInterval(()=>{ if(qIdx<querySteps.length-1){ qIdx++; renderQuerySteps(); highlightByStep(querySteps[qIdx], false);} else { qAutoplay=false; qPlay.textContent='▶️ 自动播放'; stopQTimer(); } }, 700); }
+  };
+
+  // -------------------- 事件 --------------------
+  elBuild.onclick = buildAll;
+  elRunQ.onclick = ()=> runQuery(+elQA.value, +elQB.value);
+  elRunQ1.onclick = ()=>{ const qs=parseQueries(elQueries.value); if(qs.length) runQuery(qs[0].a, qs[0].b); };
+  zoom.oninput = applyZoom;
+
+  elS1.onclick = ()=>{
+    elN.value=7; elRoot.value=1; elWeighted.checked=false;
+    elEdges.value=['1 2','1 3','2 4','2 5','3 6','3 7'].join('\n');
+    elQueries.value=['4 5','4 6','6 7'].join('\n');
+  };
+  elS2.onclick = ()=>{
+    elN.value=7; elRoot.value=1; elWeighted.checked=true;
+    elEdges.value=['1 2 3','1 3 2','2 4 4','2 5 5','3 6 1','3 7 7'].join('\n');
+    elQueries.value=['4 5','4 6','6 7'].join('\n');
+  };
+
+  // -------------------- 默认示例填充并构建 --------------------
+  elS1.click();
+  buildAll();
+})();
+</script>
+</body>
+</html>
