@@ -37,6 +37,7 @@ vector<ull> H, pB;
 ull getHash(ll l,ll r){
     return H[r]-H[l-1]*pB[r-l+1];
 }
+//A) 判重（Luogu P3370 这类）
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -71,3 +72,24 @@ int main() {
 
     return 0;
 }
+//B) 子串判断（Luogu P5410 这类）
+/*
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string S, P; cin>>S>>P;
+    B = gen_base();
+    build_hash(S);
+    ull hp = 0;
+    for(char c: P) hp = hp*B + (unsigned char)c;
+
+    int n=S.size(), m=P.size();
+    bool ok=false;
+    for(int i=1;i+m-1<=n;i++){
+        if(get_hash(i, i+m-1) == hp){ ok=true; break; }
+    }
+    cout << (ok? "Yes\n" : "No\n");
+    return 0;
+}
+*/
