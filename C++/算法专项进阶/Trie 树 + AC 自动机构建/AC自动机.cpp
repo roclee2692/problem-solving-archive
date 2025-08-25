@@ -145,7 +145,7 @@ inline void matchEach(const string& text, vector<ll>& ans, ll max_id){
     // 2) 反向汇总（自底向上）
     for(ll i=(ll)bfsOrder.size()-1; i>=0; --i){
         ll x = bfsOrder[(size_t)i];          // x 的 fail 父已在更前面
-        occ[ fail_[x] ] += occ[x];
+        occ[ fail_[x] ] += occ[x];//fail本质是在本条链路和符合条件链路的最长公共前后缀的回退
     }
     // 3) 取每个模式末结点的次数
     for(ll id=1; id<=max_id; ++id){
