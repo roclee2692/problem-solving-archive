@@ -4,7 +4,7 @@
 
 □ dijkstra.cpp - 单源最短路径
   难度: ⭐⭐ | 推荐题: LeetCode 743, Codeforces 20C
-  学习日期: _____ | 完成日期: _____ | 提交验证: ☐
+  学习日期: _10.26____ | 完成日期: _____ | 提交验证: ☐
 
 □ spfa.cpp - 负权图/负环检测
   难度: ⭐⭐ | 推荐题: LeetCode 2577, Codeforces 449B

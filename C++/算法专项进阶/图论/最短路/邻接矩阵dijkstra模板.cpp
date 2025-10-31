@@ -7,7 +7,7 @@ using pii = pair<int,int>;
  
 /* ———— 模板 1：动态邻接表 ———— */
 struct Graph1{
-    int V;
+    int V;//顶点个数
     vector<vector<pii>> adj;
     Graph1(int n):V(n),adj(n){}// 大小 n+1，索引 1…n 
     // 注意「输入是 1…n 编号，却按 0…n-1 来处理」 这里数组大小改成n+1

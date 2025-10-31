@@ -9,7 +9,7 @@ vector<ll> dist,ans,pre;
 vector<vector<pll>> adj;
 vector<ll> dijkstra(){
     dist.assign(n+1,INF);
-    pre .assign(n+1, -1);            // 初始化前驱
+    pre.assign(n+1, -1);            // 初始化前驱
     dist[1]=0;
     priority_queue<pll,vector<pll>,greater<pll>> pq;
     pq.emplace(0,1);

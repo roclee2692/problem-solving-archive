@@ -20,19 +20,23 @@ const ll INF=1e18;
 const int XN=1e3+7;
 ll dist[XN][XN];
 int n,m;
+// 对于每个中间点k：
+//   对于每对起点i、终点j：
+//     尝试通过k中转：i->k->j
+//     如果比直接路径i->j更短，就更新
 void floyd(){
-    for(int k=1;k<=n;k++){
+    for(int k=1;k<=n;k++){        // ✅ k(中间点)必须在最外层
         for(int i=1;i<=n;i++){
             for(int j=1;j<=n;j++){
-                if(dist[k][i]!=INF && dist[i][j]!=INF){
-                    dist[k][j]=min(dist[k][j],dist[k][i]+dist[i][j]);
+                if(dist[i][k]!=INF && dist[k][j]!=INF){  // ✅ 修正：i->k->j
+                    dist[i][j]=min(dist[i][j], dist[i][k]+dist[k][j]);  // ✅ 修正顺序
                 }
             }
         }
     }
 }
 int main(){
-    ios::sync_with_stdio(0); cin.tie(0);
+    ios_base::sync_with_stdio(0); cin.tie(0);
     cin>>n>>m;
     for(int i=1;i<=n;i++){    // 初始化
         for(int j=1;j<=n;j++){

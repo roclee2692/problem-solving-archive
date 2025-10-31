@@ -21,33 +21,35 @@ const int XN=1e6+7;
 vector<pll> adj[XN];// inq[u] 标记 u 是否在队列中
 vector<ll> dist;// dist: 最短距离；cnt: 入队次数
 ll cnt[XN],inq[XN];//vector<ll> dist,cnt,inq;// ❌ 没有分配大小 初始化不完整
-bool spfa(int start,int n){
+
+bool spfa(ll src,ll n){
     dist.assign(n+1,INF);
-    dist[start]=0;
+    // cnt[] 和 inq[] 全局数组默认为0，无需初始化
+    dist[src]=0;
     queue<ll> q;
-    q.push(start);
-    inq[start]=1;
-    cnt[start]++;
+    q.push(src); inq[src]=1; cnt[src]++;
     while(!q.empty()){
         ll u=q.front(); q.pop();
         inq[u]=0;
         for(auto &e:adj[u]){
-            ll v=e.first,w=e.second;
+            ll v=e.first, w=e.second;
             if(dist[u]+w<dist[v]){
                 dist[v]=dist[u]+w;
-                if(!inq[v]){
+                if(!inq[v]){//如果v不太队列中 就加入队列 已在跳过
                     q.push(v);
                     inq[v]=1;
                     cnt[v]++;
-                    if(cnt[v]>=n) return 0;// 如果某个点入队超过 n-1 次，说明存在负环
+                    if(cnt[v]>=n) return 0;
                 }
+                
             }
         }
     }
-    return 1;// 不存在负环
+    return 1;
 }
+
 int main(){
-    ios::sync_with_stdio(0); cin.tie(0);
+    ios_base::sync_with_stdio(0); cin.tie(0);
     ll n,m;
     cin>>n>>m;
     for(int i=0;i<m;i++){
