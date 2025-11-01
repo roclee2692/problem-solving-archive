@@ -19,64 +19,60 @@ using pll=pair<ll,ll>;
 const int XN=1e3+7;
 int n,m;
 vector<pll> adj[XN];
-ll dist[XN][XN];// dist[s][t]: 最终最短距离
-ll h[XN];  // 势能
-// 1. Johnson 重加权：多源全对全最短路（有向图，允许负权但无负环）
-// 返回 false 表示存在负环，true 表示成功并填充 dist 矩阵
-// Bellman-Ford 重新标号，计算势函数 h[]
-// 1) Bellman–Ford 在超源 0 上求势能 h[1..n]
+ll dist[XN][XN];
+ll h[XN];
 bool bellmanFord(){
-  vector<ll> d(n+2,INF);
-  d[0]=0;
-   // 从虚拟源点 0 连向所有点，权重 0
-   for(int i=1;i<=n;i++){
-     adj[0].push_back({i,0});//出度 储存指向谁
-   }
-    // 松弛 n 次
-   for(int i=0;i<n;i++){//多了个虚拟节点 之前n-1次 松弛 现在松弛n次
-       for(int u=0;u<=n;u++){
-          if(d[u]==INF) continue;
-          for(auto &[v,w]:adj[u]){
-              if(d[u]+w<d[v]) d[v]=d[u]+w;
-          }
-       }
-   }
-    // 检测负环
-    for(int u=0;u<=n;u++){//由于存在虚拟节点0 所有对点的松弛遍历全都要从0开始
-        if(d[u]==INF) continue;
-        for(auto &[v,w]:adj[u]){
-            if(d[u]+w<d[v]) return 0;
-        }
+    vector<ll> d(n+2,INF);
+    d[0]=0;
+    for(int i=1;i<=n;i++){  // ✅ 修正：应该到n，不是n-1
+        adj[0].push_back({i,0});
     }
-    for(int i=1;i<=n;i++) h[i]=d[i];
-    return 1;
-}
-// Dijkstra 计算从 src 到所有点的最短路
-void dijkstra(int src){
-    priority_queue<pll,vector<pll>,greater<pll>> pq;
-    vector<ll> d(n+1,INF);
-    d[src]=0;
-    pq.push({0,src});
-    
-    while(!pq.empty()){
-        auto [d_u,u]=pq.top();pq.pop();
-        if(d_u>d[u]) continue;
-        
-        for(auto &[v,w]:adj[u]){
-            // 转化边权：w' = w + h[u] - h[v]
-            ll nw=w+h[u]-h[v];
-            if(d[u]+nw<d[v]){
-                d[v]=d[u]+nw;
-                pq.push({d[v],v});
+    for(int i=0;i<n;i++){
+        for(int u=0;u<=n;u++){
+            for(auto [v,w]:adj[u]){
+                if(d[u]!=INF && d[u]+w<d[v]){
+                    d[v]=d[u]+w;
+                }
             }
         }
     }
-    
-    // 转化回原始距离
-    for(int i=1;i<=n;i++){
+        for(int u=0;u<=n;u++){
+            for(auto [v,w]:adj[u]){
+                if(d[u]!=INF && d[u]+w<d[v]){
+                    return 0;
+                }
+            }
+        }
+        for(int i=1;i<=n;i++) h[i]=d[i];  // ✅ 修正：只赋值1到n
+    return 1;
+}
+
+void dijkstra(int src){  // ✅ 修正：去掉默认参数和多余参数
+    priority_queue< pll,vector<pll>,greater<pll> > pq;
+    vector<ll> d(n+1,INF);
+    d[src]=0;
+    pq.emplace(0,src);
+    while(!pq.empty()){
+        auto [du,u]=pq.top(); pq.pop();
+        if(du>d[u]) continue;
+        for(auto [v,w]:adj[u]){
+            if(d[u]+w<d[v]){
+                //既有 d[u]-d[v]+w>=0
+                //将其作为新的边权
+                // 转化边权：w' = w + h[u] - h[v]
+                ll w=w+h[u]-h[v];//不用nw 直接写w 对吗？✅ 技术可行性：每次循环w都会重新赋值
+                d[v]=d[u]+w;
+                pq.emplace(d[v],v);
+                // 循环结束，局部变量w被销毁
+                // 下一次循环，又创建新的解构变量w
+            }
+        }
+    }
+    for(int i=1;i<=n;i++) {  // ✅ 修正：从1到n，不包括虚拟点0
         dist[src][i]=(d[i]==INF?INF:d[i]+h[i]-h[src]);
     }
 }
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     cin>>n>>m;

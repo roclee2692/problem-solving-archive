@@ -11,6 +11,14 @@
  * 
  * 模板题：洛谷 P1119 - 灾后重建
  */
+
+// 势能转化的本质：
+// 给每个节点一个"高度"h[v]
+// 边权 = 原权重 + 起点高度 - 终点高度
+// 这样做既保持了最短路性质，又消除了负权边
+// w'(u,v) = w(u,v) + h[u] - h[v]
+//        原权重  + 势能差
+
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
@@ -25,6 +33,7 @@ ll h[XN];  // 势能
 // 返回 false 表示存在负环，true 表示成功并填充 dist 矩阵
 // Bellman-Ford 重新标号，计算势函数 h[]
 // 1) Bellman–Ford 在超源 0 上求势能 h[1..n]
+// * 【Bellman-Ford 算法】- 单源最短路径（支持负权边）
 bool bellmanFord(){
   vector<ll> d(n+2,INF);
   d[0]=0;
@@ -34,21 +43,28 @@ bool bellmanFord(){
    }
     // 松弛 n 次
    for(int i=0;i<n;i++){//多了个虚拟节点 之前n-1次 松弛 现在松弛n次
-       for(int u=0;u<=n;u++){
+       for(int u=0;u<=n;u++){//外层控制轮次 内层正常遍历n+1个点
           if(d[u]==INF) continue;
           for(auto &[v,w]:adj[u]){
               if(d[u]+w<d[v]) d[v]=d[u]+w;
           }
        }
    }
-    // 检测负环
+    // 检测负环  只要原内层
     for(int u=0;u<=n;u++){//由于存在虚拟节点0 所有对点的松弛遍历全都要从0开始
         if(d[u]==INF) continue;
         for(auto &[v,w]:adj[u]){
             if(d[u]+w<d[v]) return 0;
         }
     }
+//如果程序能继续向下进行则必须满足收敛状态：无法再进行任何松弛操作
+//不存在d[u]+w<d[v] 则 d[u]+w>=d[v]
+//既有 d[u]-d[v]+w>=0
+//dist[v] ≤ dist[u] + w(u,v)  // 对所有边都成立
     for(int i=1;i<=n;i++) h[i]=d[i];
+// Bellman-Ford计算h[i] = dist[0→i]的单源最短距离
+// h[i] = 从虚拟源点0到节点i的最短距离
+    //让暴力求出的单源最短路径作为从0到i的势能
     return 1;
 }
 // Dijkstra 计算从 src 到所有点的最短路
@@ -63,7 +79,7 @@ void dijkstra(int src){
         if(d_u>d[u]) continue;
         
         for(auto &[v,w]:adj[u]){
-            // 转化边权：w' = w + h[u] - h[v]
+            // 转化边权：w' = w + h[u] - h[v]  h[0]-h[v]
             ll nw=w+h[u]-h[v];
             if(d[u]+nw<d[v]){
                 d[v]=d[u]+nw;
@@ -74,7 +90,7 @@ void dijkstra(int src){
     
     // 转化回原始距离
     for(int i=1;i<=n;i++){
-        dist[src][i]=(d[i]==INF?INF:d[i]+h[i]-h[src]);
+        dist[src][i]=(d[i]==INF?INF:d[i]+h[i]-h[src]);//h[v]-h[0]
     }
 }
 int main(){
