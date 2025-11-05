@@ -14,8 +14,8 @@ using pll = pair<ll,ll>;
    -------------------------------------------- */
 
 string S, P;            // 文本、模式串
-vector<ll> nxt;         // 标准 PMT（0-based）
-vector<ll> nxtval;      // 优化 PMT（0-based）
+vector<ll> nxt;         // 标准 KMT（0-based）
+vector<ll> nxtval;      // 优化 KMT（0-based）
 vector<ll> pos;         // 所有匹配起点（按 1-index 存）
 ll cntMatch;            // 匹配次数（允许重叠时为所有出现次数）
 
