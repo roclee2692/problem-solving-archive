@@ -19,27 +19,37 @@ using pll=pair<ll,ll>;
 string T,P;
 vector<ll> nxt,pos;
 ll cnt;
+
+// 构建 next 数组：nxt[i] = P[0..i] 的最长相等前后缀长度
 void build(){
     ll m=P.size();
-    nxt.assign(m+1,0);
+    nxt.assign(m,0);  // ✅ 大小为 m
+    // i 必须从 1 开始，nxt[0]=0
     for(int i=1,j=0;i<m;i++){
+        // 失配时回退 j
         while(j>0 && P[i]!=P[j]) j=nxt[j-1];
-        if(P[i]==P[j]) j++; // ✅ 使用比较运算符
-        nxt[i]=j;  // ✅ 记录 i 位置的最长前后缀长度
-        //next数组装的始终时j 指针的前面相同位置索引 i代表当前位置 有相等匹配就使得当前nxt[i]=j 方便下次模式串回退找到过去的自己 
+        // 匹配时扩展前后缀长度
+        if(P[i]==P[j]) j++;  // ✅ 使用 == 比较
+        nxt[i]=j;            // ✅ 记录 P[0..i] 的最长前后缀长度
     }
 }
 
+// KMP 匹配：在文本 T 中查找模式 P
 void kmp(){
-
     ll n=T.size(),m=P.size();
-    for(int i=0,j=0;i<n;i++){ //✅ i 从 0 开始扫描文本
+    cnt=0;
+    pos.clear();
+    // i 从 0 开始扫描文本 T
+    for(int i=0,j=0;i<n;i++){  // ✅ i 从 0 开始
+        // 失配时回退 j
         while(j>0 && T[i]!=P[j]) j=nxt[j-1];
+        // 匹配时扩展
         if(T[i]==P[j]) j++;
+        // 完整匹配
         if(j==m){
             cnt++;
-            pos.push_back(i-m+1);
-            j=nxt[j-1];
+            pos.push_back(i-m+1);  // ✅ 0-indexed 存储
+            j=nxt[j-1];            // 允许重叠匹配
         }
     }
 }

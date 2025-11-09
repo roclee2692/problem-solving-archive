@@ -10,8 +10,7 @@ void naiveMatch(){// 朴素匹配：窗口+逐字符
     ansPos.clear();
     ll n=S.size(),m=P.size();
     if(m==0||n<m) return;// 边界：空模式或模式更长
-    for(int i=0;i+m<=n;i++){ // i: 窗口起点(0-index)
-        int j=0;
+    for(int i=0,j=0;i+m<=n;i++){ // i: 窗口起点(0-index)
         while(j<m&&S[i+j]==P[j]) j++;
         if(j==m) ansPos.push_back(i+1);// 题目通常要1-index
     }
