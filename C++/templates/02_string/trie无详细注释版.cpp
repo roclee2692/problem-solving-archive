@@ -53,6 +53,9 @@ inline void insertStr(const string &s){
             }
         }
         u=T[u].nxt[ch];
+        /*
+        T[u].nxt[ch]  // 表示：字符 ch 对应的子节点编号（可能是新创建的，也可能是已存在的）
+        tot           // 表示：当前最大的节点编号（只在创建新节点时更新）*/
         T[u].passCnt++;
     }
     T[u].endCnt++;
