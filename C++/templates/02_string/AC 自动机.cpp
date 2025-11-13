@@ -308,6 +308,9 @@ inline ll matchCountDistinct(const string& text) {
     for (int u2 = 1; u2 <= tot; ++u2) {
         // 如果节点 u2 被访问过 且 是某个模式串的结尾
         if (occ[u2] > 0 && outcnt[u2] > 0) {
+        // "occ 确定循环运行中哪些字符（节点）在文本串中出现过"
+        // "outcnt 是我们模式串完整的结尾"
+        // "都满足才能唯一确定该模式串在文本中实际出现的次数"
             // 累加该节点代表的模式串数量
             ans += outcnt[u2];
             
