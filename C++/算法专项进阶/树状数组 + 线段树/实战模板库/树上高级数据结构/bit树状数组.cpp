@@ -21,31 +21,31 @@ using namespace std;
 typedef long long ll;
 
 class BIT{
-    private:
-    ll n;
+private:
     vector<ll> tree;
+    ll n;
     ll lowbit(ll x){
         return x&(-x);
     }
+public:
+    BIT(int n):n(n),tree(n+1,0){}
 
-    public:
-    BIT(ll n):n(n),tree(n+1,0){}
-
-    void update(ll pos,ll val){
+    void update(int pos,ll val){
         for(ll i=pos;i<=n;i+=lowbit(i)){
             tree[i]+=val;
         }
     }
-    ll query(ll pos){
-        ll ans=0;
-        for(ll i=pos;i>0;i-=lowbit(i)){//pos位置从1开始吗？//树状数组的传统实现使用 1-indexed
-            ans+=tree[i];
+
+    ll query(int pos){
+        ll res=0;
+        for(ll i=pos; i>0 ; i-=lowbit(i)){
+            res+=tree[i];
         }
-        return ans;
+        return res;
     }
-    ll rangeQuery(ll l,ll r){
+    ll rangeQuery(int l,int r){
         if(l>r) return 0;
-        return query(r)-(l>1?query(l-1):0);
+        return query(r)-( l>1 ? query(l-1) : 0);
     }
 };
 

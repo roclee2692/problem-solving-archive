@@ -31,14 +31,15 @@ private:
     
 public:
     BIT(int n) : n(n), tree(n + 1, 0) {}
-    
+    // tree[0] 不使用，实际使用 tree[1..n]
+
     void update(int pos, ll val) {
         for (int i = pos; i <= n; i += lowbit(i)) {
             tree[i] += val;
         }
     }
     
-    ll query(int pos) {
+    ll query(int pos) {// pos 必须 >= 1
         ll res = 0;
         for (int i = pos; i > 0; i -= lowbit(i)) {
             res += tree[i];
@@ -62,10 +63,10 @@ int main() {
     
     BIT bit(n);
     
-    for (int i = 1; i <= n; i++) {
+    for (int i = 1; i <= n; i++) {// 注意：i 从 1 开始
         ll x;
         cin >> x;
-        bit.update(i, x);
+        bit.update(i, x);// 位置 i 从 1 到 n
     }
     
     for (int i = 0; i < q; i++) {
