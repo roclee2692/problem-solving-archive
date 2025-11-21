@@ -20,71 +20,71 @@ using namespace std;
 
 typedef long long ll;
 
-const int MAXN = 1e5 + 5;
+const int N = 1e5 + 5;
 
-struct SegmentTree {
-    ll tree[MAXN * 4];
-    ll lazy[MAXN * 4];
-    int n;
-    
-    void push_up(int u) {
-        tree[u] = tree[u * 2] + tree[u * 2 + 1];
-    }
-    
-    void push_down(int u, int len) {
-        if (lazy[u]) {
-            lazy[u * 2] += lazy[u];
-            lazy[u * 2 + 1] += lazy[u];
-            tree[u * 2] += lazy[u] * (len / 2);
-            tree[u * 2 + 1] += lazy[u] * (len - len / 2);
-            lazy[u] = 0;
-        }
-    }
-    
-    void build(int u, int l, int r, vector<ll>& arr) {
-        if (l == r) {
-            tree[u] = arr[l];
+struct SegmentTree{
+       ll tree[N*4];
+       ll lazy[N*4];
+       ll n;
+       void push_up(ll u){
+        tree[u]= tree[2*u]+tree[2*u+1];
+       }
+       void push_down(ll u,ll len){
+        if(!lazy[u]) return;
+        lazy[2*u]+=lazy[u];
+        lazy[2*u+1]+=lazy[u];
+        tree[2*u]+=lazy[u]*(len/2);
+        tree[2*u+1]+=lazy[u]*(len-len/2);
+        lazy[u]=0;
+       }
+       void build(ll u,ll l,ll r,vector<ll> &arr){
+        if(l==r){
+            tree[u]=arr[l];
             return;
         }
-        int mid = (l + r) / 2;
-        build(u * 2, l, mid, arr);
-        build(u * 2 + 1, mid + 1, r, arr);
+        ll mid=(l+r)/2;
+        build(u,l,mid,arr);
+        build(u,mid+1,r,arr);
         push_up(u);
-    }
-    
-    void update(int u, int l, int r, int ql, int qr, ll val) {
-        if (ql > qr) return;
-        
-        if (ql <= l && r <= qr) {
-            tree[u] += val * (r - l + 1);
-            lazy[u] += val;
+       }
+        //   u - 当前节点编号
+    //   l, r - 当前节点管辖的区间
+    //   ql, qr - 要修改的查询区间
+    //   val - 要加的值
+       void update(ll u,ll l,ll r,ll ql,ll qr,ll val){
+        if(ql>qr) return;
+        if(ql<=l && r<=qr){
+            lazy[u]+=val;
+            tree[u]+=val*(r-l+1);
             return;
         }
-        
-        push_down(u, r - l + 1);
-        
-        int mid = (l + r) / 2;
-        if (ql <= mid) update(u * 2, l, mid, ql, qr, val);
-        if (qr > mid) update(u * 2 + 1, mid + 1, r, ql, qr, val);
-        
+        push_down(u,r-l+1);
+        ll mid=(r+l)/2;
+        if(ql<=mid){
+            update(2*u,l,mid,ql,qr,val);
+        }
+        if(qr>mid){
+            update(2*u+1,mid+1,r,ql,qr,val);
+        }
         push_up(u);
-    }
-    
-    ll query(int u, int l, int r, int ql, int qr) {
-        if (ql > qr) return 0;
-        if (ql <= l && r <= qr) {
+       }
+
+       ll query(ll u,ll l,ll r,ll ql,ll qr){
+        if(ql>qr) return 0;
+        if(ql<=l && r<=qr){
             return tree[u];
         }
-        
-        push_down(u, r - l + 1);
-        
-        int mid = (l + r) / 2;
-        ll res = 0;
-        if (ql <= mid) res += query(u * 2, l, mid, ql, qr);
-        if (qr > mid) res += query(u * 2 + 1, mid + 1, r, ql, qr);
-        
+        push_down(u,r-l+1);
+        ll mid=(r+l)/2;
+        ll res=0;
+        if(ql<=mid){
+            res+=query(u*2,l,mid,ql,qr);
+        }
+        if(qr>mid){
+            res+=query(u*2+1,mid+1,r,ql,qr);
+        }
         return res;
-    }
+       }
 };
 
 int main() {
