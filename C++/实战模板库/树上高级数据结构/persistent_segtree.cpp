@@ -20,109 +20,86 @@ using namespace std;
 
 typedef long long ll;
 
-const int MAXN = 2e5 + 5;
-
-struct Node {
-    int ls, rs;
-    int cnt;
+const ll N=1e6+7;
+struct Node{
+    ll ls,rs;
+    ll cnt;
 };
-
 vector<Node> tree;
-int root[MAXN];
-int n, m;
-vector<int> a;
-vector<int> sorted_a;
+ll root[N];
+ll n,m;
+vector<ll> a;
+vector<ll> sd;
 
-int newNode() {
-    tree.push_back({0, 0, 0});
-    return tree.size() - 1;
+ll NewNode(){
+    tree.push_back({0,0,0});
+    return tree.size()-1;
 }
+void insert(ll &u,ll l,ll r,ll pos,ll val){
+    ll v=NewNode();
+    tree[v]=tree[u];
+    tree[v].cnt+=val;
+    u=v;
 
-void insert(int &u, int l, int r, int pos, int val) {
-    int v = newNode();
-    tree[v] = tree[u];
-    tree[v].cnt += val;
-    u = v;
-    
-    if (l == r) return;
-    
-    int mid = (l + r) / 2;
-    if (pos <= mid) {
-        insert(tree[u].ls, l, mid, pos, val);
-    } else {
-        insert(tree[u].rs, mid + 1, r, pos, val);
+    if(l==r) return;
+
+    ll mid=(r+l)/2;
+    if(pos<=mid){
+        insert(tree[u].ls,l,mid,pos,val);
+    }else{
+        insert(tree[u].rs,mid+1,r,pos,val);
     }
 }
 
-int query(int u, int l, int r, int ql, int qr) {
-    if (ql > qr) return 0;
-    if (ql <= l && r <= qr) {
-        return tree[u].cnt;
-    }
-    
-    int mid = (l + r) / 2;
-    int res = 0;
-    if (ql <= mid) res += query(tree[u].ls, l, mid, ql, qr);
-    if (qr > mid) res += query(tree[u].rs, mid + 1, r, ql, qr);
-    
+ll query(ll u,ll l,ll r,ll ql,ll qr){
+    if(ql>qr) return 0;
+    if(ql<=l && r<=qr) return tree[u].cnt;
+    ll mid=(l+r)/2;
+    ll res=0;
+    if(ql<=mid) res+=query(tree[u].ls,l,mid,ql,qr);
+    if(qr>mid) res+=query(tree[u].rs,mid+1,r,ql,qr);  // ❌ 错误已修复：原来是 ql>mid，应该是 qr>mid
     return res;
 }
 
-int kth(int u, int l, int r, int k) {
-    if (l == r) return l;
-    
-    int mid = (l + r) / 2;
-    int left_cnt = tree[tree[u].ls].cnt;
-    
-    if (k <= left_cnt) {
-        return kth(tree[u].ls, l, mid, k);
-    } else {
-        return kth(tree[u].rs, mid + 1, r, k - left_cnt);
+ll kth(ll u,ll v,ll l,ll r,ll k){
+    if(l==r) return l;
+    ll mid=(l+r)/2;
+    ll left_cnt=tree[tree[u].ls].cnt-tree[tree[v].ls].cnt;
+    if(k<=left_cnt){
+        return kth(tree[u].ls,tree[v].ls,l,mid,k);
+    }
+    else{
+        return kth(tree[u].rs,tree[v].rs,mid+1,r,k-left_cnt);
     }
 }
-
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    
-    cin >> n >> m;
-    
-    a.resize(n + 1);
-    for (int i = 1; i <= n; i++) {
-        cin >> a[i];
-        sorted_a.push_back(a[i]);
+ll main(){
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cin>>n>>m;
+    a.resize(n+1);
+    for(int i=1;i<=n;i++){
+        cin>>a[i];
+        sd.push_back(a[i]);
     }
-    
-    sort(sorted_a.begin(), sorted_a.end());
-    sorted_a.erase(unique(sorted_a.begin(), sorted_a.end()), sorted_a.end());
-    
-    tree.push_back({0, 0, 0});
-    root[0] = 0;
-    
-    for (int i = 1; i <= n; i++) {
-        root[i] = root[i - 1];
-        int pos = lower_bound(sorted_a.begin(), sorted_a.end(), a[i]) - sorted_a.begin() + 1;
-        insert(root[i], 1, sorted_a.size(), pos, 1);
+    sort(sd.begin(),sd.end());
+    sd.erase(unique(sd.begin(),sd.end()),sd.end());
+    tree.push_back({0,0,0});
+    root[0]=0;
+    for(int i=1;i<=n;i++){
+        root[i]=root[i-1];
+        ll pos=lower_bound(sd.begin(),sd.end(),a[i])-sd.begin()+1;  // ❌ 错误已修复：原来是 -sd.end()，应该是 -sd.begin()
+        insert(root[i],1,sd.size(),pos,1);
     }
-    
-    for (int i = 0; i < m; i++) {
-        int l, r, k;
-        cin >> l >> r >> k;
-        
-        int u = root[r];
-        int v = root[l - 1];
-        
-        // 差分：计算第 k 小
-        int pos = 1, len = sorted_a.size();
-        int d = 1, ans = 0;
-        
-        // 使用两个主席树差分查询
-        cout << sorted_a[kth(u, 1, len, k) - 1] << "\n";
+    for(int i=0;i<m;i++){
+        ll l,r,k;
+        cin>>l>>r>>k;
+        ll u=root[r];
+        ll v=root[l-1];
+        ll pos=kth(u,v,1,sd.size(),k);
+        cout<<sd[pos-1]<<"\n";
     }
-    
     return 0;
 }
-
 /*
  * 【关键点】
  * 1. Node 结构：ls, rs 子指针 + cnt 计数

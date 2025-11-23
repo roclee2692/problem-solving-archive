@@ -17,79 +17,67 @@
 
 #include <bits/stdc++.h>
 using namespace std;
+using ll=long long;
 
-const int MAXN = 5e5 + 5;
-const int LOG = 20;
+const ll N=5e5+7;
+const ll LOG=20;
 
-vector<int> adj[MAXN];
-int up[MAXN][LOG];  // up[i][j] = i 的第 2^j 个祖先
-int depth[MAXN];
-int n, m, s;
+vector<ll> adj[N];
+ll up[N][LOG];
+ll depth[N];
+ll n,m,s;
 
-void dfs(int u, int p) {
-    up[u][0] = p;
-    for (int i = 1; i < LOG; i++) {
-        up[u][i] = up[up[u][i - 1]][i - 1];
+void dfs(ll u,ll p){
+    up[u][0]=p;
+    for(int i=1;i<LOG;i++){ // 应该从 i=1 开始！
+        up[u][i]=up[up[u][i-1]][i-1];
     }
-    
-    for (int v : adj[u]) {
-        if (v != p) {
-            depth[v] = depth[u] + 1;
-            dfs(v, u);
+    for(ll v:adj[u]){
+        if(v!=p){  // 避免回到父节点
+            depth[v]=depth[u]+1;
+            dfs(v,u);
         }
     }
 }
 
-int lca(int u, int v) {
-    // 将深度较大的节点向上跳到同层
-    if (depth[u] < depth[v]) swap(u, v);
-    
-    int diff = depth[u] - depth[v];
-    for (int i = 0; i < LOG; i++) {
-        if ((diff >> i) & 1) {
-            u = up[u][i];
+ll lca(ll u,ll v){
+    if(depth[u]<depth[v]) swap(v,u);
+    ll diff=depth[u]-depth[v];
+    for(ll i=0;i<LOG;i++){
+        if((diff>>i)&1){
+            u=up[u][i];
         }
     }
-    
-    if (u == v) return u;
-    
-    // 二分查找 LCA
-    for (int i = LOG - 1; i >= 0; i--) {
-        if (up[u][i] != up[v][i]) {
-            u = up[u][i];
-            v = up[v][i];
+    if(u==v) return u;
+    for(ll i=LOG-1;i>=0;i--){
+        if(up[u][i]!=up[v][i]){
+            u=up[u][i];
+            v=up[v][i];
         }
     }
-    
     return up[u][0];
 }
-
-int main() {
+int main(){
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    
-    cin >> n >> m >> s;
-    
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
+    cin>>n>>m>>s;
+    for(ll i=0;i<n-1;i++){
+        ll u,v;
+        cin>>u>>v;
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
-    
-    depth[0] = -1;
-    depth[s] = 0;
-    dfs(s, 0);
-    
+    depth[0]=-1;
+    depth[s]=0;
+    dfs(s,0);
+     // ===== 处理 m 个 LCA 查询 =====
     for (int i = 0; i < m; i++) {
         int u, v;
         cin >> u >> v;
-        cout << lca(u, v) << "\n";
+        cout << lca(u, v) << "\n";  // 输出 u 和 v 的最近公共祖先
     }
-    
     return 0;
 }
-
 /*
  * 【关键点】
  * 1. up[i][j] 表：i 的第 2^j 个祖先（二进制跳跃）

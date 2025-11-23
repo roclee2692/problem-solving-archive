@@ -8,12 +8,12 @@
   ├─ trie.cpp              - 字典树（前缀匹配）
   └─ ac_automaton.cpp      - AC 自动机（多模式匹配） -->
 
-✅ **Week 3 - 数据结构** (5 个模板)
+<!-- ✅ **Week 3 - 数据结构** (5 个模板)
   ├─ bit.cpp               - 树状数组（区间查询+单点更新）
   ├─ segment_tree.cpp      - 线段树（区间更新+区间查询）
   ├─ lca.cpp               - LCA 最近公共祖先
   ├─ persistent_segtree.cpp - 主席树（历史版本查询）
-  └─ [更多数据结构...待扩展]
+  └─ [更多数据结构...待扩展] -->
 
 ✅ **Week 4 - 数论算法** (5 个模板)
   ├─ fast_power.cpp        - 快速幂模运算
