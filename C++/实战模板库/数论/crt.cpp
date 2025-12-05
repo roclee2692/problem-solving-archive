@@ -38,27 +38,53 @@ ll exgcd(ll a,ll b,ll &x,ll &y){
     y=x1-a/b*y1;
     return d;
 }
-pair<ll,ll> crt(vector<ll> &a,vector<ll> &m){
-    int n=a.size();
+pair<ll,ll>  crt(vector<ll> &a,vector<ll> &m){
+    ll l=a.size();
     ll M=1,ans=0;
-    for(int i=0;i<n;i++){
+    for(int i=0;i<l;i++){
         M*=m[i];
     }
-    for(int i=0;i<n;i++){
-        ll Mi=M/m[i];
+    for(int i=0;i<l;i++){
+        ll mi=M/m[i];
         ll x,y;
-        exgcd(Mi,m[i],x,y);
-        x=(x%m[i]+m[i])%m[i];
-        ans=(ans+a[i]*Mi%M*x%M)%M;
+        ll d=exgcd(mi,m[i],x,y);
+        x=((x%m[i])+m[i])%m[i];
+        ans=(ans+a[i]*mi%M*x%M)%M;
     }
     return {ans,M};
 }
-pair<ll, ll> extgcd_merge(ll a1, ll m1, ll a2, ll m2) {
-    ll x, y;
-    ll d = exgcd(m1, m2, x, y);
-     if ((a2 - a1) % d != 0) {
-        return {-1, -1};  // 无解
+pair<ll,ll> extgcd_merge(ll a1,ll m1,ll a2,ll m2){
+    ll x,y;
+    ll d=exgcd(m1,m2,x,y);
+    if((a2-a1)%d!=0) return {-1,-1};
+    ll lcm=m1/d*m2;
+    ll a=(a1+m1*x%lcm*((a2-a1)/d)%lcm)%lcm;
+    a=(a+lcm)%lcm;
+    return {a,lcm};
+}
+pair<ll,ll> excrt(vector<ll> &a, vector<ll> &m){
+    ll cur_a = a[0], cur_m = m[0];
+    for (int i = 1; i < (int)a.size(); i++) {
+        auto [new_a, new_m] = extgcd_merge(cur_a, cur_m, a[i], m[i]);
+        if (new_m == -1) return {-1, -1};  // 无解
+        cur_a = new_a;
+        cur_m = new_m;
     }
+     return {cur_a, cur_m};
+}
+int main(){
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n;
+    cin>>n;
+    vector<ll> a(n),m(n);
+    for(int i=0;i<n;i++){
+        cin>>m[i]>>a[i];
+    }
+    auto [ans,M]=crt(a,m);
+    cout<<ans<<"\n";
+    return 0;
+}
 /*
  * ========== 中国剩余定理核心原理 ==========
  * 

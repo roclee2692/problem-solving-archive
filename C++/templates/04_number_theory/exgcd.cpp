@@ -38,6 +38,7 @@ typedef long long ll;
 //    得到递推公式：
 //    x = y1
 //    y = x1 - (a / b) * y1
+
 ll exgcd(ll a, ll b, ll &x, ll &y) {
     if (b == 0) {
         // 当 b=0 时，gcd(a,0)=a。方程变为 a*x + 0*y = a
