@@ -52,7 +52,46 @@ vector<ll> linearSieve(int n){
     }
      return primes;
 }
-
+map<ll,ll> factorize(ll n){
+    map<ll,ll> factors;
+    for(int i=2;i*i<=n;i++){
+        while(n%i==0){
+            factors[i]++;
+            n/=i;
+        }
+    }
+    if(n>1) factors[n]++;
+    return factors;
+}
+vector<ll> computerEuler(ll n){
+    vector<ll> phi(n+1);
+    for(ll i=0;i<=n;i++){
+        phi[i]=i;
+    }
+    for(ll i=2;i<=n;i++){
+        if(phi[i]==i){
+            for(ll j=i;j<=n;j+=i) phi[j]-=phi[j]/i;
+        }
+    }
+    return phi;
+}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n = 1e7;
+    auto primes=linearSieve(n);
+    cout<<"质数个数："<<primes.size()<<"\n";
+    ll x=123456;
+    auto factors=factorize(x);
+    cout<<"质因数分解 "<<x<<": ";
+     for (auto [p, cnt] : factors) {
+        cout << p << "^" << cnt << " ";
+    }
+    cout << "\n";
+    
+    return 0;
+}
 /*
  * 【关键点】
  * 1. 埃筛：O(n log log n)，简单但不是线性
