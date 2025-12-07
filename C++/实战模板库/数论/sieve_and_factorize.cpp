@@ -19,7 +19,8 @@
 using namespace std;
 using ll=long long;
 const int MAXN = 1e7 + 5;
-vector<ll> eratosthenes(int n){
+
+vector<ll> eratosthenes(ll n){
     vector<bool> is_prime(n+1,1);
     is_prime[0]=is_prime[1]=0;
     for(int i=2;i*i<=n;i++){
@@ -30,15 +31,14 @@ vector<ll> eratosthenes(int n){
         }
     }
     vector<ll> primes;
-    for(int i=2;i<=n;i++){
-        if(is_prime[i]) primes.push_back(i);
-        return primes;
+    for(int i=0;i<=n;i++){
+        if(is_prime[i]==1) primes.push_back(i);
     }
+    return primes;
 }
-
-vector<ll> linearSieve(int n){
-    vector<ll> is_prime(n+1,1);
-    vector<ll> primes;
+vector<int> linearSieve(int n){
+    vector<bool> is_prime(n+1,1);
+    vector<int> primes;
     is_prime[0]=is_prime[1]=0;
     for(int i=2;i<=n;i++){
         if(is_prime[i]){
@@ -47,10 +47,10 @@ vector<ll> linearSieve(int n){
         for(int p:primes){
             if(i*p>n) break;
             is_prime[i*p]=0;
-            if(i%p==0) break;// 关键：避免重复筛
+            if(i%p==0) break;
         }
     }
-     return primes;
+    return primes;
 }
 map<ll,ll> factorize(ll n){
     map<ll,ll> factors;
@@ -63,14 +63,14 @@ map<ll,ll> factorize(ll n){
     if(n>1) factors[n]++;
     return factors;
 }
-vector<ll> computerEuler(ll n){
+vector<ll> computeEuler(ll n){
     vector<ll> phi(n+1);
-    for(ll i=0;i<=n;i++){
-        phi[i]=i;
-    }
-    for(ll i=2;i<=n;i++){
+    iota(phi.begin(),phi.end(),0);
+    for(int i=2;i<=n;i++){
         if(phi[i]==i){
-            for(ll j=i;j<=n;j+=i) phi[j]-=phi[j]/i;
+            for(int j=i;j<=n;j+=i){
+                phi[j]-=phi[j]/i;
+            }
         }
     }
     return phi;
@@ -80,12 +80,16 @@ int main() {
     cin.tie(nullptr);
     
     int n = 1e7;
-    auto primes=linearSieve(n);
-    cout<<"质数个数："<<primes.size()<<"\n";
-    ll x=123456;
-    auto factors=factorize(x);
-    cout<<"质因数分解 "<<x<<": ";
-     for (auto [p, cnt] : factors) {
+    
+    // 获取质数表
+    auto primes = linearSieve(n);
+    cout << "质数个数: " << primes.size() << "\n";
+    
+    // 质因数分解示例
+    int x = 1234567;
+    auto factors = factorize(x);
+    cout << "质因数分解 " << x << ": ";
+    for (auto [p, cnt] : factors) {
         cout << p << "^" << cnt << " ";
     }
     cout << "\n";
