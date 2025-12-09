@@ -18,7 +18,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;
+typedef long long ll;//must prime
 
 const int MAXN = 1e6 + 5;
 const ll MOD = 1e9 + 7;
@@ -58,7 +58,60 @@ void init_catalan_recurrence(int n) {
     //               = [(2n) * (2n-1)] / [n * n] * [n / (n+1)]
     //               = (4n - 2) / (n + 1)
     for (int i = 2; i <= n; i++) {
+        // Step 1: Multiply by (4i - 2)
+        // catalan[i] = catalan[i-1] * (4i - 2) / (i + 1)
+        // We compute the multiplication first with modulo
         catalan[i] = catalan[i - 1] * (4 * i - 2) % MOD;
+        
+        // Step 2: Divide by (i + 1) using modular inverse
+        // 【为什么用 qpow(i + 1, MOD - 2, MOD)?】
+        // 
+        // 问题：在模运算中，我们不能直接除以 (i+1)
+        // 解决：用"乘以逆元"来代替"除法"
+        //
+        // 【什么是模逆元 (modular inverse)?】
+        // 数字 a 在模 p 下的逆元是一个数 a_inv，满足：
+        //     (a * a_inv) ≡ 1 (mod p)
+        //     意思是：a 乘以 a_inv 除以 p 的余数是 1
+        // 
+        // 所以：除以 a 等价于 乘以 a_inv
+        //     x / a ≡ x * a_inv (mod p)
+        //
+        // 【如何计算模逆元？】
+        // 使用费马小定理 (Fermat's Little Theorem)：当 p 是质数时
+        //     a^(p-1) ≡ 1 (mod p)          （费马小定理）
+        //     两边同时除以 a：
+        //     a^(p-2) * a ≡ 1 (mod p)
+        // 因此：a^(p-2) 就是 a 的模逆元！
+        //
+        // 【这行代码的含义：】
+        // - 我们想要：catalan[i] = catalan[i] / (i+1) mod MOD
+        // - 实际计算：catalan[i] = catalan[i] * (i+1)^(MOD-2) mod MOD
+        // - qpow(i+1, MOD-2, MOD) 计算 (i+1) 的 (MOD-2) 次方，结果对 MOD 取模
+        // - 这个结果就是 (i+1) 的模逆元
+        //
+        // 【具体例子：】
+        // 假设 MOD = 7，i = 2，我们要除以 3
+        // 
+        // 步骤1：求 3 的逆元
+        //   3^(7-2) mod 7 = 3^5 mod 7 = 243 mod 7 = 5
+        // 
+        // 步骤2：验证 3 * 5 ≡ 1 (mod 7)
+        //   3 * 5 = 15 = 7 * 2 + 1，所以 15 mod 7 = 1 ✓
+        // 
+        // 步骤3：用逆元替代除法
+        //   如果我们要算 20 / 3 (mod 7)：
+        //   直接除：20 / 3 = 6.666...（不是整数，无法取模）
+        //   用逆元：20 * 5 = 100，100 mod 7 = 2
+        //   
+        //   验证：20 / 3 = 6.666..., 6 mod 7 = 6（错误的理解）
+        //   正确理解：我们找的是 x 使得 3x ≡ 20 (mod 7)
+        //            3x ≡ 20 ≡ 6 (mod 7)
+        //            x ≡ 6 * 5 ≡ 30 ≡ 2 (mod 7) ✓
+        //
+        // 【为什么模数要是质数？】
+        // 费马小定理只对质数成立，所以 MOD 必须是质数（如 1e9+7）
+        // 如果 MOD 不是质数，需要用扩展欧几里得算法求逆元
         catalan[i] = catalan[i] * qpow(i + 1, MOD - 2, MOD) % MOD;
     }
 }

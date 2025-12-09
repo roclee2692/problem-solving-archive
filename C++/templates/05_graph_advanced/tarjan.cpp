@@ -23,31 +23,85 @@ const int MAXN = 1e5 + 5;
 struct Tarjan {
     int n;
     vector<int> adj[MAXN];
-    int dfn[MAXN], low[MAXN];
+    
+    // 【WHY we need dfn[]?】
+    // dfn[u] = discovery time of node u (when we first visit it)
+    // Used to identify if a node has been visited and distinguish different types of edges
+    int dfn[MAXN];
+    
+    // 【WHY we need low[]?】
+    // low[u] = the smallest dfn value that u or its descendants can reach via tree edges or back edges
+    // If low[u] == dfn[u], it means u cannot reach any ancestor → u is the root of an SCC
+    int low[MAXN];
+    
+    // 【WHY we need in_stack[]?】
+    // To distinguish between back edges (pointing to nodes in stack) and cross edges
+    // Cross edges point to nodes in other SCCs that have already been processed
+    // Only back edges can help us find SCCs
     bool in_stack[MAXN];
+    
+    // 【WHY we need a stack?】
+    // The stack stores all nodes in the current DFS path
+    // When we find an SCC root (dfn[u] == low[u]), we pop all nodes from stack until u
+    // These popped nodes form one SCC
     stack<int> st;
-    int timestamp = 0, scc_count = 0;
-    vector<int> scc_id;
+    
+    int timestamp = 0;      // Global timer for dfn values
+    int scc_count = 0;      // Number of SCCs found
+    vector<int> scc_id;     // scc_id[u] = which SCC node u belongs to
     
     Tarjan(int n) : n(n), scc_id(n + 1) {}
     
     void dfs(int u) {
+        // 【WHY initialize both dfn[u] and low[u] to timestamp?】
+        // - dfn[u] records when we discovered u
+        // - low[u] starts with dfn[u] and will be updated if we find a path to an earlier node
         dfn[u] = low[u] = ++timestamp;
+        
+        // 【WHY push u onto stack?】
+        // u might be part of an SCC that we haven't fully discovered yet
+        // We keep it in the stack until we determine which SCC it belongs to
         st.push(u);
         in_stack[u] = true;
         
+        // Explore all edges from u
         for (int v : adj[u]) {
             if (!dfn[v]) {
+                // 【Case 1: Tree Edge - v not visited yet】
+                // WHY recurse? We need to explore the subtree rooted at v
                 dfs(v);
+                
+                // 【WHY update low[u] with low[v]?】
+                // If v's subtree can reach an earlier node, then u can also reach it (through v)
+                // This propagates reachability information up the DFS tree
                 low[u] = min(low[u], low[v]);
+                
             } else if (in_stack[v]) {
+                // 【Case 2: Back Edge - v is an ancestor in current DFS path】
+                // WHY check in_stack[v]? To distinguish from cross edges
+                // Cross edges point to nodes in already-completed SCCs (not in stack)
+                
+                // 【WHY update low[u] with dfn[v] (not low[v])?】
+                // Because v is an ancestor, we can directly reach v
+                // Using dfn[v] is more precise - it's the actual discovery time of v
+                // Using low[v] would be incorrect because v might have been updated by other paths
                 low[u] = min(low[u], dfn[v]);
             }
+            // 【Case 3: Cross Edge - v visited but not in stack】
+            // WHY do nothing? v is in a different SCC that's already been identified
+            // Cross edges don't affect the current SCC we're forming
         }
         
-        // 找到一个 SCC 的根
+        // 【WHY check if dfn[u] == low[u]?】
+        // This means u cannot reach any node with earlier discovery time
+        // Therefore, u is the "root" of an SCC (the first node discovered in this SCC)
+        // All nodes from u to stack top form one SCC
         if (dfn[u] == low[u]) {
             scc_count++;
+            
+            // 【WHY pop until we reach u?】
+            // All nodes pushed after u (with later dfn values) that couldn't escape
+            // back to earlier nodes belong to the same SCC as u
             while (true) {
                 int v = st.top();
                 st.pop();
