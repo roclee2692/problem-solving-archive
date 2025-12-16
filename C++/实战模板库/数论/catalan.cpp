@@ -19,32 +19,30 @@
 using namespace std;
 
 typedef long long ll;
-
-const int XN = 1e6 + 5;
-const ll MOD = 1e9 + 7;
+const int XN=1e6+9;
+const int MOD=1e9+7;
 ll catalan[XN];
 ll fac[XN];
 ll inv[XN];
-
-ll qpow(ll a,ll b,ll mod){
-    ll res=1;
-    a%=mod;
-    while(b){
-        if(b&1) res=res*a%mod;
-        a=a*a%mod;
+ll qpow(ll a,ll b){
+    ll ans=1;
+    a%=MOD;
+    while(b>0){
+        if(b&1) ans=ans*a%MOD;
+        a=(a*a)%MOD;
         b>>=1;
     }
-    return res;
+    return ans;
 }
-void init_catalan(ll n){
+ll init_catalan(ll n){
     catalan[0]=1;
     catalan[1]=1;
-    for(ll i=2;i<=n;i++){
+    for(int i=2;i<=n;i++){
         catalan[i]=catalan[i-1]*(4*i-2)%MOD;
-        catalan[i]=catalan[i]*qpow(i+1,MOD-2,MOD)%MOD;
+        catalan[i]=catalan[i]*qpow(i+1,MOD-2)%MOD;
     }
+    return catalan[n];
 }
-
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);

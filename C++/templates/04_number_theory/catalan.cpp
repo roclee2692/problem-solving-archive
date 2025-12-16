@@ -18,10 +18,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;//must prime
+typedef long long ll;
 
 const int MAXN = 1e6 + 5;
-const ll MOD = 1e9 + 7;
+const ll MOD = 1e9 + 7;//must prime
 
 ll catalan[MAXN];  // catalan[n] = 第 n 个 Catalan 数
 ll fac[MAXN];      // 阶乘
