@@ -1,5 +1,10 @@
 {
+    "editor.semanticHighlighting.enabled": true,
+    "C_Cpp.enhancedColorization": "enabled",
     "files.associations": {
+        "*.cpp": "cpp",
+        "*.hpp": "cpp",
+        "*.h": "cpp",
         "random": "cpp",
         "iostream": "cpp",
         "ostream": "cpp",
