@@ -17,44 +17,37 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-const int MAXN = 1e5 + 5;
-
+const int XN = 1e5 + 5;
+using ll=long long;
 int n, m;
-vector<int> adj[MAXN];    // 邻接表
-int dfn[MAXN], low[MAXN]; // dfn: 时间戳, low: 能到达的最小时间戳
-bool in_stk[MAXN];         // 是否在栈中
-int stk[MAXN], top;        // 手写栈
-int timestamp;             // 时间戳计数器
-int scc_cnt;               // SCC 个数
-int scc_id[MAXN];          // 每个点属于哪个 SCC
+vector<int> adj[XN];
+ll dfn[XN],low[XN];
+bool in_st[XN];
+ll stk[XN],top;
+ll timestamp;
+ll scc_cnt;
+ll scc_id[XN];
 
-// Tarjan DFS
-void tarjan(int u) {
-    dfn[u] = low[u] = ++timestamp;
-    stk[++top] = u;
-    in_stk[u] = true;
-    
-    for (int v : adj[u]) {
-        if (!dfn[v]) {
-            // 树边：v 未访问
+void tarjan(int u){
+    dfn[u]=low[u]=++timestamp;
+    stk[++top]=u;
+    in_st[u]=1;
+    for(ll v:adj[u]){
+        if(!dfn[v]){
             tarjan(v);
-            low[u] = min(low[u], low[v]);
-        } else if (in_stk[v]) {
-            // 回边：v 在栈中（同一个 SCC）
-            low[u] = min(low[u], dfn[v]);
+            low[u]=min(low[u],low[v]);
+        }else if(in_st[v]){
+            low[u]=min(low[u],dfn[v]);
         }
-        // 横叉边：v 已访问但不在栈中（不同 SCC），不更新 low
     }
-    
-    // u 是 SCC 的根
-    if (dfn[u] == low[u]) {
+    if(dfn[u]==low[u]){
         scc_cnt++;
-        int v;
-        do {
-            v = stk[top--];
-            in_stk[v] = false;
-            scc_id[v] = scc_cnt;
-        } while (v != u);
+        ll v;
+        do{
+            v=stk[top--];
+            in_st[v]=0;
+            scc_id[v]=scc_cnt;
+        }while(v!=u);
     }
 }
 

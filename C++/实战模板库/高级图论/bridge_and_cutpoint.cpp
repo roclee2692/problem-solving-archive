@@ -15,55 +15,40 @@
 
 #include <bits/stdc++.h>
 using namespace std;
+const int XN = 1e5 + 5;
 
-const int MAXN = 1e5 + 5;
+int n,m;
+int dfn[XN],low[XN];
+int timestamp;
+bool vis[XN];
+vector<int> adj[XN];
+vector<pair<int,int>> bridges;
+set<int> cut;
 
-int n, m;
-vector<int> adj[MAXN];       // 邻接表
-int dfn[MAXN], low[MAXN];    // dfn: 时间戳, low: 能回溯到的最小时间戳
-bool vis[MAXN];              // 是否访问过
-int timestamp;               // 时间戳计数器
-vector<pair<int, int>> bridges;  // 桥
-set<int> cut;                // 割点（用 set 自动去重）
-
-void dfs(int u, int fa) {
-    // 【初始化】标记已访问，分配时间戳
-    vis[u] = true;
-    dfn[u] = low[u] = ++timestamp;
-    
-    // 【子树计数】记录子树个数（用于判断根是否为割点）
-    int children = 0;
-    
-    for (int v : adj[u]) {
-        // 【重边处理】第一次遇到父节点跳过，p=-1 标记已跳过
-        if (v == fa) {
-            fa = -1;
+void dfs(int u,int fa){
+    vis[u]=true;
+    dfn[u]=low[u]=++timestamp;
+    int children=0;
+    for(int v:adj[u]){
+        if(v==fa){
+            fa=-1;
             continue;
         }
-        
-        if (vis[v]) {
-            // 【回边】v 已访问，更新 low[u]
-            low[u] = min(low[u], dfn[v]);
-        } else {
-            // 【树边】v 未访问
+        if(vis[v]){
+            low[u]=min(low[u],dfn[v]);
+        }else{
             children++;
-            dfs(v, u);
-            low[u] = min(low[u], low[v]);
-            
-            // 【判断桥】low[v] > dfn[u] 说明 v 无法回到 u
-            if (low[v] > dfn[u]) {
-                bridges.push_back({min(u, v), max(u, v)});
+            dfs(v,u);
+            low[u]=min(low[u],low[v]);
+            if(low[v]>dfn[u]){
+                bridges.push_back({min(u,v),max(u,v)});
             }
-            
-            // 【判断割点（非根）】low[v] >= dfn[u] 说明 v 最多回到 u
-            if (fa != -1 && low[v] >= dfn[u]) {
+            if(fa!=-1 && low[v]>=dfn[u]){
                 cut.insert(u);
             }
         }
     }
-    
-    // 【判断割点（根）】根有 ≥2 个子树就是割点
-    if (fa == -1 && children > 1) {
+    if(fa==-1 && children>1){
         cut.insert(u);
     }
 }
@@ -110,7 +95,7 @@ int main() {
  * - 判断条件：low[v] > dfn[u]
  * - 含义：v 的子树无法通过其他路径回到 u 或 u 的祖先
  * - 用 > 而不是 >=：如果能回到 u，说明有另一条路径，不是桥
- *    
+ * 
  * 【割点（Cut Vertex / Articulation Point）】
  * - 定义：删除后使图的连通分量增加的点
  * - 判断条件（非根）：low[v] >= dfn[u]
