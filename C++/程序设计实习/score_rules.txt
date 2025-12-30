@@ -1,0 +1,33 @@
+# 教师科研工作量计分规则配置文件
+# 格式说明：
+#   基础分规则：类型|级别|分数
+#   顺序系数规则：类型_order|顺序|系数
+#   经费规则：fund|每万元分数|上限分数
+
+# ========== 论文基础分 ==========
+paper|national|30
+paper|provincial|20
+paper|school|10
+paper|other|8
+
+# ========== 论文顺序系数 ==========
+paper_order|1|1.0
+paper_order|2|0.7
+paper_order|3|0.5
+paper_order|other|0.3
+
+# ========== 项目基础分 ==========
+project|national|50
+project|provincial|35
+project|school|20
+project|other|15
+
+# ========== 项目顺序系数 ==========
+project_order|1|1.0
+project_order|2|0.6
+project_order|3|0.4
+project_order|other|0.25
+
+# ========== 经费规则 ==========
+# 每1万元=1分，上限50分
+fund|1.0|50.0
