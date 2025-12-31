@@ -126,7 +126,7 @@ void loadColleges(){
     }
     fin.close();
 }
-void saveColleges(){
+void saveColleges(){//写入
     ofstream fout(F_COL);
     for(auto&c:colleges)fout<<c.cid<<"|"<<c.name<<"\n";
     fout.close();
@@ -220,159 +220,159 @@ void showAppliesFiltered(function<bool(const Apply&)>filter){
 //登录登出
 bool login(){
     ll uid;string pwd;
-    cout<<"UID:";cin>>uid;
-    cout<<"Password:";cin>>pwd;
+    cout<<"用户ID：";cin>>uid;
+    cout<<"密码：";cin>>pwd;
     int idx=findUserIdx(uid);
-    if(idx==-1||users[idx].pwd!=pwd){cout<<"login failed.\n";return false;}
+    if(idx==-1||users[idx].pwd!=pwd){cout<<"登录失败。\n";return false;}
     cur_uid=uid;cur_role=users[idx].role;
-    cout<<"Welcome,"<<users[idx].name<<"!\n";
+    cout<<"欢迎，"<<users[idx].name<<"！\n";
     return true;
 }
-void logout(){cur_uid=-1;cur_role=-1;cout<<"logged out.\n";}
+void logout(){cur_uid=-1;cur_role=-1;cout<<"已退出登录。\n";}
 
 //增删改学院
 void addCollege(){
     College c;
-    cout<<"cid:";cin>>c.cid;
-    if(findCollegeIdx(c.cid)!=-1){cout<<"cid exists.\n";return;}
-    cout<<"name:";
+    cout<<"学院ID：";cin>>c.cid;
+    if(findCollegeIdx(c.cid)!=-1){cout<<"学院ID已存在。\n";return;}
+    cout<<"学院名称：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     getline(cin,c.name);c.name=trim(c.name);
     colleges.push_back(c);
-    cout<<"OK.\n";
+    cout<<"添加成功。\n";
 }
 void delCollege(){
-    ll cid;cout<<"cid to delete:";cin>>cid;
+    ll cid;cout<<"要删除的学院ID：";cin>>cid;
     int idx=findCollegeIdx(cid);
-    if(idx==-1){cout<<"not found.\n";return;}
+    if(idx==-1){cout<<"未找到该学院。\n";return;}
     colleges.erase(colleges.begin()+idx);
-    cout<<"OK.\n";
+    cout<<"删除成功。\n";
 }
 void editCollege(){
-    ll cid;cout<<"cid to edit:";cin>>cid;
+    ll cid;cout<<"要编辑的学院ID：";cin>>cid;
     int idx=findCollegeIdx(cid);
-    if(idx==-1){cout<<"not found.\n";return;}
-    cout<<"Current name:"<<colleges[idx].name<<"\n";
-    cout<<"New name(Enter to keep):";
+    if(idx==-1){cout<<"未找到该学院。\n";return;}
+    cout<<"当前名称："<<colleges[idx].name<<"\n";
+    cout<<"新名称（直接回车保持不变）：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     string newName;getline(cin,newName);newName=trim(newName);
-    if(!newName.empty()){colleges[idx].name=newName;cout<<"Updated.\n";}
-    else cout<<"Unchanged.\n";
+    if(!newName.empty()){colleges[idx].name=newName;cout<<"更新成功。\n";}
+    else cout<<"未修改。\n";
 }
 
 //增删改教师
 void addTeacherUser(){
     User u;u.role=0;
-    cout<<"uid:";cin>>u.uid;
-    if(findUserIdx(u.uid)!=-1){cout<<"uid exists.\n";return;}
-    cout<<"cid:";cin>>u.cid;
-    if(findCollegeIdx(u.cid)==-1)cout<<"warning:cid not found.\n";
-    cout<<"name:";
+    cout<<"教师ID：";cin>>u.uid;
+    if(findUserIdx(u.uid)!=-1){cout<<"教师ID已存在。\n";return;}
+    cout<<"学院ID：";cin>>u.cid;
+    if(findCollegeIdx(u.cid)==-1)cout<<"警告：学院ID未找到。\n";
+    cout<<"姓名：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     getline(cin,u.name);u.name=trim(u.name);
-    cout<<"password:";
+    cout<<"密码：";
     getline(cin,u.pwd);u.pwd=trim(u.pwd);
     users.push_back(u);
-    cout<<"OK.\n";
+    cout<<"添加成功。\n";
 }
 void delTeacherUser(){
-    ll uid;cout<<"uid to delete:";cin>>uid;
+    ll uid;cout<<"要删除的教师ID：";cin>>uid;
     int idx=findUserIdx(uid);
-    if(idx==-1||users[idx].role!=0){cout<<"not found or is admin.\n";return;}
+    if(idx==-1||users[idx].role!=0){cout<<"未找到该教师或该用户为管理员。\n";return;}
     users.erase(users.begin()+idx);
-    cout<<"OK.\n";
+    cout<<"删除成功。\n";
 }
 void editTeacherUser(){
-    ll uid;cout<<"uid to edit:";cin>>uid;
+    ll uid;cout<<"要编辑的教师ID：";cin>>uid;
     int idx=findUserIdx(uid);
-    if(idx==-1||users[idx].role!=0){cout<<"not found or is admin.\n";return;}
-    cout<<"Current info:\n";
-    cout<<"  Name:"<<users[idx].name<<"\n";
-    cout<<"  College ID:"<<users[idx].cid<<"\n";
-    cout<<"  Password:"<<users[idx].pwd<<"\n\n";
+    if(idx==-1||users[idx].role!=0){cout<<"未找到该教师或该用户为管理员。\n";return;}
+    cout<<"当前信息：\n";
+    cout<<"  姓名："<<users[idx].name<<"\n";
+    cout<<"  学院ID："<<users[idx].cid<<"\n";
+    cout<<"  密码："<<users[idx].pwd<<"\n\n";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
-    cout<<"New name(Enter to keep):";
+    cout<<"新姓名（直接回车保持不变）：";
     string newName;getline(cin,newName);newName=trim(newName);
     if(!newName.empty())users[idx].name=newName;
-    cout<<"New college ID(Enter to keep):";
+    cout<<"新学院ID（直接回车保持不变）：";
     string cidStr;getline(cin,cidStr);cidStr=trim(cidStr);
     if(!cidStr.empty()){
         ll newCid=stoll(cidStr);
         if(findCollegeIdx(newCid)!=-1)users[idx].cid=newCid;
-        else cout<<"[Warning]College ID "<<newCid<<" not found,cid unchanged.\n";
+        else cout<<"[警告]学院ID "<<newCid<<" 未找到，学院ID未修改。\n";
     }
-    cout<<"New password(Enter to keep):";
+    cout<<"新密码（直接回车保持不变）：";
     string newPwd;getline(cin,newPwd);newPwd=trim(newPwd);
     if(!newPwd.empty())users[idx].pwd=newPwd;
-    cout<<"Updated.\n";
+    cout<<"更新成功。\n";
 }
 
 //教师提交申请
 void submitPaper(){
     Apply a;a.aid=nextApplyId();a.type=1;a.uid=cur_uid;
-    cout<<"year:";cin>>a.year;
-    cout<<"title:";
+    cout<<"年份：";cin>>a.year;
+    cout<<"论文标题：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     getline(cin,a.title);a.title=trim(a.title);
-    cout<<"level(e.g.national/provincial/school):";
+    cout<<"级别（如national/provincial/school）：";
     getline(cin,a.level);a.level=trim(a.level);
-    cout<<"order(1st/2nd/...):";cin>>a.ord;
+    cout<<"作者顺序（第几作者）：";cin>>a.ord;
     a.amount=0;a.status=0;a.score=0;
     applies.push_back(a);
-    cout<<"Submitted.AID="<<a.aid<<"\n";
+    cout<<"提交成功。申请ID="<<a.aid<<"\n";
 }
 void submitProject(){
     Apply a;a.aid=nextApplyId();a.type=2;a.uid=cur_uid;
-    cout<<"year:";cin>>a.year;
-    cout<<"title:";
+    cout<<"年份：";cin>>a.year;
+    cout<<"项目标题：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     getline(cin,a.title);a.title=trim(a.title);
-    cout<<"level(e.g.national/provincial/school):";
+    cout<<"级别（如national/provincial/school）：";
     getline(cin,a.level);a.level=trim(a.level);
-    cout<<"order(1st/2nd/...):";cin>>a.ord;
+    cout<<"负责人顺序（第几负责人）：";cin>>a.ord;
     a.amount=0;a.status=0;a.score=0;
     applies.push_back(a);
-    cout<<"Submitted.AID="<<a.aid<<"\n";
+    cout<<"提交成功。申请ID="<<a.aid<<"\n";
 }
 void submitFund(){
     Apply a;a.aid=nextApplyId();a.type=3;a.uid=cur_uid;
-    cout<<"year:";cin>>a.year;
-    cout<<"amount(yuan):";cin>>a.amount;
+    cout<<"年份：";cin>>a.year;
+    cout<<"经费金额（元）：";cin>>a.amount;
     a.ord=0;a.status=0;a.score=0;
     applies.push_back(a);
-    cout<<"Submitted.AID="<<a.aid<<"\n";
+    cout<<"提交成功。申请ID="<<a.aid<<"\n";
 }
 
 //管理员审核
 void reviewOne(){
-    ll aid;cout<<"AID to review:";cin>>aid;
+    ll aid;cout<<"要审核的申请ID：";cin>>aid;
     int idx=findApplyIdx(aid);
-    if(idx==-1){cout<<"not found.\n";return;}
+    if(idx==-1){cout<<"未找到该申请。\n";return;}
     Apply&a=applies[idx];
-    if(a.status!=0){cout<<"already reviewed.\n";return;}
+    if(a.status!=0){cout<<"该申请已审核过。\n";return;}
     line();
-    cout<<"AID:"<<a.aid<<" Type:"<<(a.type==1?"Paper":(a.type==2?"Project":"Fund"))
-        <<" UID:"<<a.uid<<" Year:"<<a.year<<"\n";
-    if(a.type!=3)cout<<"Title:"<<a.title<<" Level:"<<a.level<<" Order:"<<a.ord<<"\n";
-    else cout<<"Amount:"<<a.amount<<"\n";
+    cout<<"申请ID："<<a.aid<<" 类型："<<(a.type==1?"论文":(a.type==2?"项目":"经费"))
+        <<" 教师ID："<<a.uid<<" 年份："<<a.year<<"\n";
+    if(a.type!=3)cout<<"标题："<<a.title<<" 级别："<<a.level<<" 顺序："<<a.ord<<"\n";
+    else cout<<"金额："<<a.amount<<"\n";
     double autoScore=calcScore(a);
-    cout<<"Auto score:"<<fixed<<setprecision(2)<<autoScore<<"\n";
+    cout<<"自动计算分数："<<fixed<<setprecision(2)<<autoScore<<"\n";
     line();
-    cout<<"Approve?(1=yes,2=no):";
+    cout<<"是否通过？（1=通过，2=驳回）：";
     int st;cin>>st;
-    if(st!=1&&st!=2){cout<<"Invalid.\n";return;}
+    if(st!=1&&st!=2){cout<<"输入无效。\n";return;}
     a.status=st;
     if(st==1){
-        cout<<"Enter final score(or -1 to use auto score):";
+        cout<<"输入最终分数（输入-1使用自动分数）：";
         double x;cin>>x;
         cout.unsetf(ios::floatfield);
         if(x<-0.5)a.score=autoScore;
         else a.score=x;
     }else a.score=0;
-    cout<<"Feedback:";
+    cout<<"反馈意见：";
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     getline(cin,a.feedback);a.feedback=trim(a.feedback);
-    cout<<"Review done.\n";
+    cout<<"审核完成。\n";
 }
 
 //统计教师
@@ -419,25 +419,25 @@ void statsCollege(){
 
 //菜单
 void menuTeacher(){
-    cout<<"\n=== Teacher Menu ===\n";
-    cout<<"1.Submit Paper\n2.Submit Project\n3.Submit Fund\n";
-    cout<<"4.View My Applies\n5.View My Approved Applies\n";
-    cout<<"s.Save\n0.Logout\nSelect:";
+    cout<<"\n=== 教师菜单 ===\n";
+    cout<<"1.提交论文申请\n2.提交项目申请\n3.提交经费申请\n";
+    cout<<"4.查看我的所有申请\n5.查看我的已通过申请\n";
+    cout<<"s.保存数据\n0.退出登录\n请选择：";
 }
 void menuAdmin(){
-    cout<<"\n=== Admin Menu ===\n";
-    cout<<"1.Show Colleges\n2.Add College\n3.Delete College\n4.Edit College\n";
-    cout<<"5.Show Users\n6.Add Teacher User\n7.Edit Teacher User\n";
-    cout<<"8.Show All Applies\n9.Show Pending Applies\n10.Review One Apply\n";
-    cout<<"11.Stats By Teacher\n12.Stats By College\n";
-    cout<<"s.Save\n0.Logout\nSelect:";
+    cout<<"\n=== 管理员菜单 ===\n";
+    cout<<"1.显示所有学院\n2.添加学院\n3.删除学院\n4.编辑学院\n";
+    cout<<"5.显示所有用户\n6.添加教师\n7.编辑教师信息\n";
+    cout<<"8.显示所有申请\n9.显示待审核申请\n10.审核单个申请\n";
+    cout<<"11.按教师统计\n12.按学院统计\n";
+    cout<<"s.保存数据\n0.退出登录\n请选择：";
 }
 
 //主程序
 int main(){
     loadAll();
     while(1){
-        cout<<"\n=== System ===\n1.Login\n0.Exit\nSelect:";
+        cout<<"\n=== 教师科研工作量管理系统 ===\n1.登录\n0.退出系统\n请选择：";
         int op;cin>>op;
         if(op==0)break;
         if(op!=1)continue;
@@ -447,21 +447,21 @@ int main(){
                 menuTeacher();
                 string input;cin>>input;
                 if(input=="0"){logout();break;}
-                if(input=="s"||input=="S"){saveAll();cout<<"Saved.\n";continue;}
+                if(input=="s"||input=="S"){saveAll();cout<<"数据已保存。\n";continue;}
                 int x=(input.size()==1&&input[0]>='0'&&input[0]<='9')?(input[0]-'0'):-1;
                 if(x==1)submitPaper();
                 else if(x==2)submitProject();
                 else if(x==3)submitFund();
                 else if(x==4)showAppliesFiltered([](const Apply&a){return a.uid==cur_uid;});
                 else if(x==5)showAppliesFiltered([](const Apply&a){return a.uid==cur_uid&&a.status==1;});
-                else cout<<"Invalid.\n";
+                else cout<<"输入无效。\n";
             }
         }else{//管理员
             while(1){
                 menuAdmin();
                 string input;cin>>input;
                 if(input=="0"){logout();break;}
-                if(input=="s"||input=="S"){saveAll();cout<<"Saved.\n";continue;}
+                if(input=="s"||input=="S"){saveAll();cout<<"数据已保存。\n";continue;}
                 int x=-1;
                 if(input=="10")x=10;
                 else if(input=="11")x=11;
@@ -479,7 +479,7 @@ int main(){
                 else if(x==10)reviewOne();
                 else if(x==11)statsTeacher();
                 else if(x==12)statsCollege();
-                else cout<<"Invalid.\n";
+                else cout<<"输入无效。\n";
             }
         }
     }
