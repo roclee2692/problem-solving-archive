@@ -22,14 +22,14 @@
   ├─ sieve_and_factorize.cpp - 素数筛+质因数分解
   └─ [组合数学...待扩展] -->
 
-✅ **Week 5 - 高级图论** (3 个模板)
+<!-- ✅ **Week 5 - 高级图论** (3 个模板)
   ├─ topo_sort.cpp         - 拓扑排序（检测环）
   ├─ tarjan.cpp            - 强连通分量（缩点）
-  └─ bridge_and_cutpoint.cpp - 桥与割点
+  └─ bridge_and_cutpoint.cpp - 桥与割点 -->
 
-✅ **Week 6 - 动态规划** (3 个模板)
-  ├─ bitmask_dp.cpp        - 位运算 DP（状态压缩）
-  ├─ tree_dp.cpp           - 树形 DP
+<!-- ✅ **Week 6 - 动态规划** (3 个模板)
+  ├─ bitmask_dp.cpp        - 位运算 DP（状态压缩） -->
+  <!-- ├─ tree_dp.cpp           - 树形 DP -->
   └─ matrix_power_dp.cpp   - 矩阵快速幂（线性递推加速）
 
 === 使用流程 ===
@@ -47,6 +47,7 @@
   Week 4 补充：Lucas 定理、Catalan 数列
   Week 5 补充：网络流（Dinic、MCMF）
   Week 6 补充：凸包、CDQ 分治
+
 
 === 关键特性 ===
 
