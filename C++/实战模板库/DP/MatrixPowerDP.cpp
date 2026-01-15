@@ -3,10 +3,10 @@ using namespace std;
 using ll=long long;
 const ll MOD=1e9+7;
 struct Matrix{
-    ll a[2][2];
+    vector<vector<ll>> a;
     int n,m;
     Matrix(int n0=2,int m0=2):n(n0),m(m0){
-        memset(a,0,sizeof(a));
+        a.assign(n0, vector<ll>(m0, 0));
     }
     Matrix operator*(const Matrix &b)const{
         Matrix c(n,b.m);
