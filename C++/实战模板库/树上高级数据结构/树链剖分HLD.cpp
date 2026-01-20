@@ -2,7 +2,7 @@
 using namespace std;
 using ll=long long;
 const int XN=1e5+7;
-
+ll mod;
 vector<int> adj[XN];
 int n,m,root;
 
@@ -23,19 +23,20 @@ struct SegmentTree{
     ll tree[XN*4];
     ll lazy[XN*4];
     void push_up(int u){
-        tree[u]=tree[u*2]+tree[u*2+1];
+        tree[u]=(tree[u*2]+tree[u*2+1])%mod;
     }
     void push_down(int u,int len){
         if(!lazy[u]) return;
-        lazy[u*2]+=lazy[u];
-        lazy[u*2+1]+=lazy[u];
-        tree[u*2]+=lazy[u]*(len/2);
-        tree[u*2+1]+=lazy[u]*(len-len/2);
+         lazy[u * 2] = (lazy[u * 2] + lazy[u]) % mod;
+        lazy[u * 2 + 1] = (lazy[u * 2 + 1] + lazy[u]) % mod;
+        tree[u * 2] = (tree[u * 2] + lazy[u] * (len / 2)) % mod;
+        tree[u * 2 + 1] = (tree[u * 2 + 1] + lazy[u] * (len - len / 2)) % mod;
         lazy[u]=0;
     }
     void build(int u,int l,int r){
+        lazy[u]=0;
         if(l==r){
-            tree[u]=w[l];
+            tree[u]=w[l]%mod;
             return;
         }
         int mid=(l+r)/2;
@@ -44,9 +45,10 @@ struct SegmentTree{
         push_up(u);
     }
     void update(int u,int l,int r,int ql,int qr,ll val){
+        val%=mod;
         if(ql<=l && r<=qr){
-            lazy[u]+=val;
-            tree[u]+=val*(r-l+1);
+            lazy[u] = (lazy[u] + val) % mod;
+            tree[u] = (tree[u] + val * (r - l + 1)) % mod;
             return;
         }
         push_down(u,r-l+1);
@@ -60,8 +62,8 @@ struct SegmentTree{
         push_down(u,r-l+1);
         int mid=(l+r)/2;
         ll res=0;
-        if(ql<=mid) res+=query(u*2,l,mid,ql,qr);
-        if(qr>mid) res+=query(u*2+1,mid+1,r,ql,qr);
+        if (ql <= mid) res = (res + query(u * 2, l, mid, ql, qr)) % mod;
+        if (qr > mid) res = (res + query(u * 2 + 1, mid + 1, r, ql, qr)) % mod;
         return res;
     }
 } seg;
@@ -105,7 +107,7 @@ ll query_path(int u,int v){
         u=fa[top[u]];
     }
     if(dep[u]>dep[v]) swap(u,v);
-    res+=seg.query(1,1,n,dfn[u],dfn[v]);
+    res = (res + seg.query(1, 1, n, dfn[top[u]], dfn[u])) % mod;
     return res;
 }
 void update_path(int u,int v,ll val){
@@ -127,7 +129,6 @@ void update_subtree(int u,ll val){
 int main(){
     ios::sync_with_stdio(0);
     cin.tie(0);
-    int mod;
     cin>>n>>m>>root>>mod;
     for(int i=1;i<=n;i++){
         cin>>a[i];

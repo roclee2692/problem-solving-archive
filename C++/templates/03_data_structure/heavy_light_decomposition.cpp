@@ -21,6 +21,7 @@ using namespace std;
 typedef long long ll;
 
 const int MAXN = 1e5 + 5;
+ll mod;  // 全局模数
 
 // ===== 树链剖分核心数据 =====
 vector<int> adj[MAXN];      // 邻接表存储树
@@ -50,21 +51,22 @@ struct SegmentTree {
     ll lazy[MAXN * 4];   // 懒标记（区间加）
     
     void push_up(int u) {
-        tree[u] = tree[u * 2] + tree[u * 2 + 1];
+        tree[u] = (tree[u * 2] + tree[u * 2 + 1]) % mod;
     }
     
     void push_down(int u, int len) {
         if (!lazy[u]) return;
-        lazy[u * 2] += lazy[u];
-        lazy[u * 2 + 1] += lazy[u];
-        tree[u * 2] += lazy[u] * (len / 2);
-        tree[u * 2 + 1] += lazy[u] * (len - len / 2);
+        lazy[u * 2] = (lazy[u * 2] + lazy[u]) % mod;
+        lazy[u * 2 + 1] = (lazy[u * 2 + 1] + lazy[u]) % mod;
+        tree[u * 2] = (tree[u * 2] + lazy[u] * (len / 2)) % mod;
+        tree[u * 2 + 1] = (tree[u * 2 + 1] + lazy[u] * (len - len / 2)) % mod;
         lazy[u] = 0;
     }
     
     void build(int u, int l, int r) {
+        lazy[u] = 0;
         if (l == r) {
-            tree[u] = w[l];  // 用 DFS 序上的权值建树
+            tree[u] = w[l] % mod;  // 用 DFS 序上的权值建树
             return;
         }
         int mid = (l + r) / 2;
@@ -74,9 +76,10 @@ struct SegmentTree {
     }
     
     void update(int u, int l, int r, int ql, int qr, ll val) {
+        val %= mod;
         if (ql <= l && r <= qr) {
-            lazy[u] += val;
-            tree[u] += val * (r - l + 1);
+            lazy[u] = (lazy[u] + val) % mod;
+            tree[u] = (tree[u] + val * (r - l + 1)) % mod;
             return;
         }
         push_down(u, r - l + 1);
@@ -91,8 +94,8 @@ struct SegmentTree {
         push_down(u, r - l + 1);
         int mid = (l + r) / 2;
         ll res = 0;
-        if (ql <= mid) res += query(u * 2, l, mid, ql, qr);
-        if (qr > mid) res += query(u * 2 + 1, mid + 1, r, ql, qr);
+        if (ql <= mid) res = (res + query(u * 2, l, mid, ql, qr)) % mod;
+        if (qr > mid) res = (res + query(u * 2 + 1, mid + 1, r, ql, qr)) % mod;
         return res;
     }
 } seg;
@@ -155,7 +158,7 @@ ll query_path(int u, int v) {
         // u 跳到链顶
         // 查询 [dfn[top[u]], dfn[u]] 这段 DFS 序的和
         // 为什么 DFS 序连续？因为重链在 DFS 序上是连续的
-        res += seg.query(1, 1, n, dfn[top[u]], dfn[u]);
+        res = (res + seg.query(1, 1, n, dfn[top[u]], dfn[u])) % mod;
         
         // u 跳到链顶的父节点（进入上一条重链）
         u = fa[top[u]];
@@ -166,7 +169,7 @@ ll query_path(int u, int v) {
     if (dep[u] > dep[v]) swap(u, v);
     
     // 查询 [dfn[u], dfn[v]] 的和
-    res += seg.query(1, 1, n, dfn[u], dfn[v]);
+    res = (res + seg.query(1, 1, n, dfn[u], dfn[v])) % mod;
     return res;
 }
 
@@ -196,7 +199,6 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     
-    int mod;
     cin >> n >> m >> root >> mod;
     
     for (int i = 1; i <= n; i++) {
