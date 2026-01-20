@@ -61,7 +61,7 @@ void add_edge(int from, int to, ll cap) {
 // 
 // 【为什么要分层？】
 // 1. 防止流在同层乱窜或往回流
-// 2. DFS 严格按 level[u] < level[e.to] 走，保证最短路性质
+// 2. DFS 严格按 level[e.to] == level[u] + 1 走，保证最短路性质
 // 3. 大幅剪枝，避免重复搜索无用路径
 // 4. 使得 Dinic 比朴素 EK 快得多
 // 
