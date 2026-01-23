@@ -1,5 +1,5 @@
 /*
- * 【凸包 Convex Hull】- Graham 扫描法
+ * 【凸包 Convex Hull】- Andrew 算法（单调链）
  * 
  * 时间复杂度：O(n log n)
  * 空间复杂度：O(n)
@@ -13,6 +13,12 @@
  * 模板题：
  *   - 洛谷 P2742 - 【模板】二维凸包
  *   - Codeforces 166B - Polygon
+ * 
+ * Andrew 算法优点：
+ *   1. 按 x 坐标排序，比极角排序更稳定
+ *   2. 分别构造上下凸壳，逻辑清晰
+ *   3. 不需要找起始点
+ *   4. 代码实现简洁
  */
 
 #include <bits/stdc++.h>
@@ -21,6 +27,18 @@ using namespace std;
 typedef long long ll;
 
 const double EPS = 1e-9;
+
+// ===== 精度处理函数 =====
+// 符号函数：返回 -1, 0, 1
+int sgn(double x) {
+    if (fabs(x) < EPS) return 0;
+    return x < 0 ? -1 : 1;
+}
+
+// 浮点数比较
+int dcmp(double x, double y) {
+    return sgn(x - y);
+}
 
 // ===== 点结构 =====
 struct Point {
@@ -70,9 +88,12 @@ struct Point {
 
 // ===== 叉积（用于判断方向）=====
 // 返回 (p1 - p0) × (p2 - p0)
-// > 0：p2 在 p0p1 的左侧（逆时针）
-// < 0：p2 在 p0p1 的右侧（顺时针）
+// 【关键】叉积判断向量方向：
+// > 0：p2 在向量 p0→p1 的左侧（逆时针，左转）
+// < 0：p2 在向量 p0→p1 的右侧（顺时针，右转）
 // = 0：三点共线
+// 
+// 【物理意义】|叉积| = 以 p0p1, p0p2 为边的平行四边形面积
 ll cross(const Point &p0, const Point &p1, const Point &p2) {
     return (p1 - p0).cross(p2 - p0);
 }
@@ -82,60 +103,62 @@ ll dis2(const Point &p1, const Point &p2) {
     return (p1 - p2).len2();
 }
 
-// ===== Graham 扫描法求凸包 =====
+// ===== Andrew 算法求凸包 =====
+// 【核心思想】
+// 1. 按 x 坐标排序（x 相同按 y）
+// 2. 用单调栈分别构造下凸壳（从左到右）
+// 3. 再构造上凸壳（从右到左）
+// 4. 合并两个凸壳得到完整凸包
+// 
+// 【为什么叫单调链？】
+// 下凸壳：从左到右，y 坐标"单调"递增趋势
+// 上凸壳：从右到左，y 坐标"单调"递减趋势
+// 
 // 返回凸包上的点（逆时针顺序）
 // 时间复杂度：O(n log n)
 vector<Point> convexHull(vector<Point> points) {
     int n = points.size();
     if (n <= 2) return points;  // 少于 3 个点，直接返回
     
-    // ===== 步骤 1：找到最左下角的点作为起点 =====
-    // 为什么选最左下角？保证起点一定在凸包上
-    int start = 0;
-    for (int i = 1; i < n; i++) {
-        if (points[i].y < points[start].y || 
-            (points[i].y == points[start].y && points[i].x < points[start].x)) {
-            start = i;
-        }
-    }
-    swap(points[0], points[start]);
-    Point p0 = points[0];
-    
-    // ===== 步骤 2：按极角排序 =====
-    // 所有点按相对于 p0 的极角从小到大排序
-    // 极角相同时，距离近的在前
-    // 为什么这样排序？Graham 扫描需要按逆时针顺序处理
-    sort(points.begin() + 1, points.end(), [&](const Point &a, const Point &b) {
-        ll c = cross(p0, a, b);
-        if (c != 0) return c > 0;  // 极角小的在前（逆时针）
-        return dis2(p0, a) < dis2(p0, b);  // 极角相同，距离近的在前
+    // ===== 步骤 1：按 x 排序（x 相同按 y）=====
+    // 【为什么这样排序？】
+    // Andrew 算法从左到右扫描，需要 x 递增
+    // x 相同时，y 小的在前，保证稳定性
+    sort(points.begin(), points.end(), [](const Point &a, const Point &b) {
+        return a.x < b.x || (a.x == b.x && a.y < b.y);
     });
     
-    // ===== 步骤 3：Graham 扫描 =====
-    // 用栈维护凸包，不断判断是否需要弹出
     vector<Point> hull;
-    hull.push_back(points[0]);
-    hull.push_back(points[1]);
     
-    for (int i = 2; i < n; i++) {
-        // ===== 关键判断：右转则弹出 =====
-        // 如果新点在栈顶两点的右侧（顺时针），说明栈顶点不在凸包上
-        // 为什么？凸包的边界应该是逆时针的，右转说明凹进去了
-        while (hull.size() >= 2) {
-            Point p1 = hull[hull.size() - 2];
-            Point p2 = hull[hull.size() - 1];
-            
-            // cross < 0：右转，弹出
-            // cross = 0：共线，也弹出（不需要中间点）
-            // cross > 0：左转，保留
-            if (cross(p1, p2, points[i]) <= 0) {
-                hull.pop_back();
-            } else {
-                break;
-            }
+    // ===== 步骤 2：构造下凸壳 =====
+    // 从左到右扫描，维护下边界
+    // 【单调栈判断】遇到"右转"就弹出（保持凸性）
+    for (int i = 0; i < n; i++) {
+        // 【关键】cross <= 0 要弹出：
+        // < 0：右转，凹进去了，不符合凸性
+        // = 0：共线，中间点没用
+        while (hull.size() >= 2 && 
+               cross(hull[hull.size() - 2], hull[hull.size() - 1], points[i]) <= 0) {
+            hull.pop_back();
         }
         hull.push_back(points[i]);
     }
+    
+    // ===== 步骤 3：构造上凸壳 =====
+    // 从右到左扫描，维护上边界
+    // 注意：要去掉最后一个点（避免重复）
+    int lower_size = hull.size();  // 记录下凸壳大小
+    for (int i = n - 2; i >= 0; i--) {
+        while (hull.size() > lower_size && 
+               cross(hull[hull.size() - 2], hull[hull.size() - 1], points[i]) <= 0) {
+            hull.pop_back();
+        }
+        hull.push_back(points[i]);
+    }
+    
+    // ===== 步骤 4：移除最后一个重复点 =====
+    // 最后一个点是起点，已经在下凸壳的开头了
+    hull.pop_back();
     
     return hull;
 }
