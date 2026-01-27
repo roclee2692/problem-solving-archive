@@ -1,0 +1,21 @@
+# CodeQL build artifacts
+_codeql_detected_source_root
+*/_codeql_build_dir/
+
+# Compiled executables
+*.exe
+*.out
+*.o
+
+# Build artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# IDE files
+.vscode/
+.idea/
+
+# Test files
+/tmp/
