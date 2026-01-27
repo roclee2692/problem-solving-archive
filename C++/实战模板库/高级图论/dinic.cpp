@@ -20,8 +20,136 @@ using namespace std;
 
 typedef long long ll;
 
+const int MAXN = 1e4 + 5;
+const int MAXM = 2e5 + 5;
+const ll INF = 1e18;
 
+// ===== 网络流核心数据结构 =====
+struct Edge {
+    int to;      // 终点
+    ll cap;      // 容量
+    int rev;     // 反向边在邻接表中的位置
+    // 为什么需要反向边？用于退流（回溯时减少流量）
+};
 
+vector<Edge> adj[MAXN];  // 邻接表
+int n, m, s, t;          // n 个点，m 条边，源点 s，汇点 t
+int level[MAXN];         // level[i] = 从源点 s 到 i 的最短距离（BFS 分层）
+int iter[MAXN];          // iter[i] = 当前弧优化（记录搜索到哪条边了）
+
+// ===== 添加边 =====
+// 同时添加正向边和反向边（容量为 0）
+// 为什么要添加反向边？用于退流，维护流量守恒
+void add_edge(int from, int to, ll cap) {
+    // 正向边：from → to，容量 cap
+    // rev = adj[to].size()：此时反向边还未插入，size() 就是反向边即将占据的位置（不需要 -1）
+    adj[from].push_back({to, cap, (int)adj[to].size()});
+    
+    // 反向边：to → from，容量 0
+    // rev = adj[from].size() - 1：正向边刚刚插入完成，位置是当前 size() - 1（需要 -1）
+    adj[to].push_back({from, 0, (int)adj[from].size() - 1});
+}
+
+// ===== BFS 分层图 =====
+// 目的：计算从源点 s 到每个点的最短距离（层数）
+// 为什么要分层？优化 DFS，只沿着距离递增的边走，避免重复搜索
+// 时间复杂度：O(n + m)
+bool bfs() {
+    fill(level, level + n + 1, -1);  // -1 表示未访问
+    queue<int> q;
+    q.push(s);
+    level[s] = 0;
+    
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        
+        for (auto &e : adj[u]) {
+            // 只考虑还有容量的边
+            if (e.cap > 0 && level[e.to] < 0) {
+                level[e.to] = level[u] + 1;
+                q.push(e.to);
+            }
+        }
+    }
+    
+    // 返回是否能到达汇点 t
+    // 如果不能到达，说明没有增广路了，算法结束
+    return level[t] >= 0;
+}
+
+// ===== DFS 寻找增广路并增广 =====
+// 参数：u - 当前节点，flow - 当前路径的最小剩余容量
+// 返回：实际增广的流量
+// 时间复杂度：O(m)（单次）
+ll dfs(int u, ll flow) {
+    // ===== 到达汇点，返回流量 =====
+    if (u == t) return flow;
+    
+    // ===== 当前弧优化 =====
+    // 从 iter[u] 开始搜索，避免重复搜索已经增广过的边
+    // 为什么有效？因为每条边只会被增广一次（在同一轮 DFS 中）
+    for (int &i = iter[u]; i < adj[u].size(); i++) {
+        Edge &e = adj[u][i];
+        
+        // ===== 只沿着分层图的边走 =====
+        // level[e.to] == level[u] + 1：保证距离递增
+        // e.cap > 0：保证边还有容量
+        if (e.cap > 0 && level[u] < level[e.to]) {
+            // 递归搜索
+            ll d = dfs(e.to, min(flow, e.cap));
+            
+            if (d > 0) {
+                // ===== 增广成功，更新容量 =====
+                e.cap -= d;              // 正向边减少容量
+                adj[e.to][e.rev].cap += d;  // 反向边增加容量（用于退流）
+                return d;
+            }
+        }
+    }
+    
+    // 没有找到增广路
+    return 0;
+}
+
+// ===== Dinic 算法主函数 =====
+// 核心思想：不断 BFS 分层 + DFS 增广，直到没有增广路
+// 时间复杂度：O(n² * m)（理论），实际远小于此
+ll dinic() {
+    ll max_flow = 0;
+    
+    // ===== 主循环：BFS 分层 + DFS 增广 =====
+    while (bfs()) {
+        // 当前弧优化：每次 BFS 后重置
+        fill(iter, iter + n + 1, 0);
+        
+        // ===== 不断 DFS 增广，直到没有增广路 =====
+        ll flow;
+        while ((flow = dfs(s, INF)) > 0) {
+            max_flow += flow;
+        }
+    }
+    
+    return max_flow;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    cin >> n >> m >> s >> t;
+    
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        ll cap;
+        cin >> u >> v >> cap;
+        add_edge(u, v, cap);  // 有向边
+    }
+    
+    cout << dinic() << "\n";
+    
+    return 0;
+}
 
 /*
  * ========== Dinic 算法核心原理 ==========
