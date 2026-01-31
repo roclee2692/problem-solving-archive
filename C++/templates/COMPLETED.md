@@ -45,8 +45,8 @@
 【扩展计划】
   Week 3 补充：HLD（树链剖分）、二分答案
   <!-- Week 4 补充：Lucas 定理、Catalan 数列 -->
-  Week 5 补充：网络流（Dinic、MCMF）
-  Week 6 补充：凸包、CDQ 分治
+  <!-- Week 5 补充：网络流（Dinic、MCMF） -->
+  <!-- Week 6 补充：凸包、CDQ 分治 -->
 
 === 关键特性 ===
 
