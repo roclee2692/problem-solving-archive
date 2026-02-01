@@ -49,7 +49,7 @@ void cdq(int l,int r){
     int mid=(l+r)/2;
     cdq(l,mid);
     cdq(mid+1,r);
-    int i=l,j=mid+1,k=1;
+    int i=l,j=mid+1,k=l;
     while(i<=mid && j<=r){//双指针
         if(p[i].b<=p[j].b){
             bit.add(p[i].c,p[i].cnt);
