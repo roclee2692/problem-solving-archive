@@ -1,8 +1,129 @@
 # problem-solving-archive
 
+[English](#english) | [中文](#中文)
+
+---
+
+# English
+
 A comprehensive coding problem-solving archive with detailed solutions, competitive programming templates, and well-commented algorithms.
 
-## 📚 更新说明 (Latest Updates)
+## 📚 Latest Updates
+
+### 🔥 2026.02.01 - Template Library Optimization
+
+**CDQ Divide & Conquer Template Rewritten**
+- ✅ Added detailed line-by-line comments explaining every function
+- ✅ Binary Indexed Tree (BIT) with complete workflow demonstration
+- ✅ CDQ divide & conquer core principles explained (divide, merge, query)
+- ✅ Real code examples with calculation process
+- ✅ Common mistakes and debugging tips
+- ✅ Complexity analysis and comparison with other algorithms
+- 📍 Now you can fully understand the algorithm just by reading the comments
+
+**Key Files**
+- `C++/templates/06_dynamic_programming/cdq_divide_conquer.cpp` - Detailed version (recommended for learning)
+- `C++/实战模板库/分治与偏序统计/CDQ分治三维偏序.cpp` - Competition version (concise code)
+
+## 📁 Project Structure
+
+```
+coding-practice-archive/
+├── C++/
+│   ├── 蓝桥杯B备考/          # Lanqiao Cup competition problems
+│   ├── 洛谷/                # Luogu platform problems
+│   ├── 实战模板库/          # Competition algorithm templates
+│   │   ├── 数据结构/        # Data Structures
+│   │   ├── 树上高级数据结构/ # Advanced Tree Structures
+│   │   ├── 数论/            # Number Theory
+│   │   ├── 分治与偏序统计/  # ⭐ Divide & Conquer
+│   │   ├── 计算几何/        # Computational Geometry
+│   │   └── ...
+│   └── templates/           # Detailed commented versions
+│       ├── 01_graph_basic/
+│       ├── 02_string/
+│       ├── 03_data_structure/
+│       ├── 04_number_theory/
+│       ├── 05_graph_advanced/
+│       └── 06_dynamic_programming/  # ⭐ CDQ Divide & Conquer
+├── Python/
+├── 前端/                    # Frontend projects
+└── 其它/                    # Others
+```
+
+## 🎯 Template Features
+
+1. **Detailed Comments** - Every algorithm has Chinese comments for understanding
+2. **Two Versions** - Competition version (concise) and Learning version (detailed)
+3. **Battle-tested** - All code has been tested and verified
+4. **Complexity Analysis** - Time and space complexity clearly marked
+5. **Recommended Problems** - Each template comes with practice problems
+
+## 💡 CDQ Divide & Conquer - 3D Partial Order
+
+### Core Concept
+- **Problem**: Given n 3D points, count how many points are dominated by each point
+- **Brute Force**: O(n²) - Too slow
+- **CDQ Divide & Conquer**: O(n log² n) - 275x faster!
+
+### Key Techniques
+- 1st dimension: Sorting (preprocessing)
+- 2nd dimension: Merge sort during divide & conquer
+- 3rd dimension: BIT for prefix sum queries
+
+### Learning Path
+1. Understand BIT's four functions: `init`, `lowbit`, `add`, `query`
+2. Understand that each position in BIT stores a range sum
+3. Understand CDQ's three steps: Divide → Count → Merge
+4. Manually simulate small data (n=5) through the complete process
+
+### Recommended Problems
+- Luogu P3810 - 3D Partial Order (Template Problem)
+- Luogu P1975 - Dynamic Inversion Pairs
+- BZOJ 3262 - Enhanced Version
+
+## 🚀 Quick Start
+
+### View Detailed Version (Recommended for Learning)
+```bash
+C++/templates/06_dynamic_programming/cdq_divide_conquer.cpp
+```
+
+### View Competition Version (Concise Code)
+```bash
+C++/实战模板库/分治与偏序统计/CDQ分治三维偏序.cpp
+```
+
+## 📊 Content Statistics
+
+- **C++ Competition Templates**: 150+ files
+- **Python Data Analysis**: 10+ practical projects
+- **Frontend Projects**: Vue/HTML showcase pages
+- **Detailed Comments**: 10,000+ lines of commented code
+
+## ⭐ Features
+
+- ✅ **Dimension-by-dimension Processing** - Core of CDQ divide & conquer
+- ✅ **BIT Optimization** - O(log n) operations
+- ✅ **Deduplication Optimization** - Merge identical points
+- ✅ **Detailed Derivation** - Every step with examples
+- ✅ **Visual Demonstration** - Array changes visualization
+
+## 🤝 Contributors
+
+- roclee2692 (Main Maintainer)
+
+## ⚖️ License
+
+MIT License
+
+---
+
+# 中文
+
+一个全面的编程问题解决方案归档库，包含详细的解题思路、竞赛编程模板和注释完善的算法。
+
+## 📚 更新说明
 
 ### 🔥 2026.02.01 - 模板库优化升级
 
@@ -103,21 +224,6 @@ C++/实战模板库/分治与偏序统计/CDQ分治三维偏序.cpp
 - ✅ **详细推导** - 每步计算都有示例
 - ✅ **图解演示** - 数组变化过程可视化
 
-## 📖 文档说明
-
-所有算法模板都包含：
-1. **问题描述** - 这个算法解决什么问题
-2. **复杂度分析** - 时间和空间复杂度
-3. **适用场景** - 什么时候用这个算法
-4. **核心原理** - 算法为什么这样做
-5. **代码注释** - 每行代码的含义
-6. **常见错误** - 踩过的坑
-7. **推荐题目** - 配套练习题
-
-## 🤝 贡献者
-
-- roclee2692 (主要维护者)
-
 ## 📝 更新日志
 
 ### 2026.02.01
@@ -129,6 +235,10 @@ C++/实战模板库/分治与偏序统计/CDQ分治三维偏序.cpp
 - 蓝桥杯备考题库
 - 各类数据结构模板
 - 图论和动态规划模板
+
+## 🤝 贡献者
+
+- roclee2692 (主要维护者)
 
 ## ⚖️ License
 
